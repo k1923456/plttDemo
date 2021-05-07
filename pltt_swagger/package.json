@@ -1,0 +1,20 @@
+{
+    "name": "doc",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "dependencies": {
+        "dotenv": "^8.0.0",
+        "express": "^4.16.4",
+        "swagger-ui-express": "^4.1.6",
+        "yamljs": "^0.3.0"
+    },
+    "devDependencies": {
+        "nodemon": "^1.18.9"
+    },
+    "scripts": {
+        "start": "node ./server.js"
+    },
+    "author": "",
+    "license": "ISC"
+}

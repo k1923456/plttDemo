@@ -1,0 +1,201 @@
+openapi: "3.0.0"
+info:
+  version: 0.0.1
+  title: PLTT API
+servers:
+  - url: http://192.168.21.126:23456
+tags:
+- name: "pltt"
+  description: "PLTT API list"
+paths:
+  # /object/{oid}:
+  #   get:
+  #     tags:
+  #     - "pltt"
+  #     summary: Get Object Data
+  #     parameters:
+  #       - $ref: '#/definitions/oid'
+  #     responses:
+  #       "200":
+  #         description: normal status
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: array
+  #               items:
+  #                 type: object
+  #                 properties:
+  #                   oid:
+  #                     $ref: '#/definitions/oid'
+  #                   phid:
+  #                     $ref: '#/definitions/phid'
+  #                   title:
+  #                     $ref: '#/definitions/title'
+  #                   startTime:
+  #                     $ref: '#/definitions/startTime'
+  #                   endTime:
+  #                     $ref: '#/definitions/endTime'
+  #                   txid:
+  #                     $ref: '#/definitions/txid'
+  #                   lastTx:
+  #                     $ref: '#/definitions/lastTx'
+  #                   nextTx:
+  #                     $ref: '#/definitions/nextTx'
+  #                   mediaList:
+  #                     $ref: '#/definitions/mediaList'
+  /object:
+    post:
+      tags:
+      - "pltt"
+      summary: Create Object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oid:
+                  $ref: '#/definitions/oid'
+                phid:
+                  $ref: '#/definitions/phid'
+                title:
+                  $ref: '#/definitions/title'
+                procedure:
+                  $ref: '#/definitions/procedure'
+                sourceIds:
+                  $ref: '#/definitions/sourceIds'
+                producedNumber:
+                  $ref: '#/definitions/producedNumber'
+                restNumber:
+                  $ref: '#/definitions/restNumber'
+                startTime:
+                  $ref: '#/definitions/startTime'
+                endTime:
+                  $ref: '#/definitions/endTime'
+                mediaList:
+                  $ref: '#/definitions/mediaList'
+                sensorDataURLs:
+                  $ref: '#/definitions/sensorDataURLs'
+      responses:
+        "201":
+          description: Successfully Call
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Success"
+        "400":
+          description: User Body Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Missing OID"
+        "500":
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Internal Server Error"
+    put:
+      tags:
+      - "pltt"
+      summary: Update Object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oid:
+                  $ref: '#/definitions/oid'
+                phid:
+                  $ref: '#/definitions/phid'
+                title:
+                  $ref: '#/definitions/title'
+                procedure:
+                  $ref: '#/definitions/procedure'
+                sourceIds:
+                  $ref: '#/definitions/sourceIds'
+                producedNumber:
+                  $ref: '#/definitions/producedNumber'
+                restNumber:
+                  $ref: '#/definitions/restNumber'
+                startTime:
+                  $ref: '#/definitions/startTime'
+                endTime:
+                  $ref: '#/definitions/endTime'
+                mediaList:
+                  $ref: '#/definitions/mediaList'
+                sensorDataURLs:
+                  $ref: '#/definitions/sensorDataURLs'
+      responses:
+        "201":
+          description: Successfully Call
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Success"
+        "400":
+          description: User Body Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Missing OID"
+        "500":
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Internal Server Error"
+
+definitions:
+  oid:
+    name: oid
+    example: "133450"
+  phid:
+    description: Product ID
+    example: null
+  title:
+    example: "紅茶 (茶湯)"
+  procedure:
+    example: "原料倉領貨作業(原料倉)"
+  sourceIds:
+    example: ["47246"]
+  producedNumber: 
+    example: 15000 ML
+  restNumber:
+    example:  15000 ML
+  startTime:
+    example: "2020-11-06 16:43:04"
+  endTime:
+    example: "2020-11-06 16:43:17"
+  mediaList:
+    example: ["https://s3.hicloud.net.tw/foodcloud/nvr/908/133092.mp4"]
+  sensorDataURLs:
+    type: array
+    example: ["https://www.aptbee.com/c?PRO=auto.ShowHChart_T&i=00124B000A94F821o_o1&key=%2FrwiD0GQyQuM1ubX7zDhO0L8HRxm9bpxHBXMO%2FnM69Xey2Xpy3Xp7C0QGNN%2FCQui&tkey=1562515200&startDate=2020%2F11%2F06+16%3A43%3A04&endDate=2020%2F11%2F06+16%3A43%3A17"]
+  txid:
+    examlpe: "0xca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
+  lastTx:
+    example: null
+  nextTx:
+    examlpe: "0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"
