@@ -35,7 +35,7 @@ paths:
                 producedNumber:
                   $ref: '#/definitions/producedNumber'
                 restNumber:
-                  $ref: '#/definitions/restNumber'
+                  $ref: '#/definitions/restNumberSame'
                 expirationDate:
                   $ref: '#/definitions/expirationDate'
                 mediaList:
@@ -280,6 +280,8 @@ definitions:
     example: 5000 ML
   restNumber:
     example:  10000 ML
+  restNumberSame:
+    example:  15000 ML
   expirationDate:
     example: "2020-11-06 16:43:04"
   transactionDate:
