@@ -30,13 +30,8 @@ paths:
                   $ref: '#/definitions/procedureID'
                 title:
                   $ref: '#/definitions/title'
-<<<<<<< HEAD
                 sourceList:
                   $ref: '#/definitions/sourceList'
-=======
-                sourceIds:
-                  $ref: '#/definitions/sourceIds'
->>>>>>> efe5e399db35e22d92652f45074b47714060a70a
                 producedNumber:
                   $ref: '#/definitions/producedNumber'
                 restNumber:
@@ -96,13 +91,8 @@ paths:
                   $ref: '#/definitions/procedureID'
                 title:
                   $ref: '#/definitions/title'
-<<<<<<< HEAD
                 sourceList:
                   $ref: '#/definitions/sourceList'
-=======
-                sourceIds:
-                  $ref: '#/definitions/sourceIds'
->>>>>>> efe5e399db35e22d92652f45074b47714060a70a
                 producedNumber:
                   $ref: '#/definitions/producedNumber'
                 restNumber:
