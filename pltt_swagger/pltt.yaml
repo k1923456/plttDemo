@@ -30,10 +30,8 @@ paths:
                   $ref: '#/definitions/procedureID'
                 title:
                   $ref: '#/definitions/title'
-                procedure:
-                  $ref: '#/definitions/procedure'
-                sourceIds:
-                  $ref: '#/definitions/sourceIds'
+                sourceList:
+                  $ref: '#/definitions/sourceList'
                 producedNumber:
                   $ref: '#/definitions/producedNumber'
                 restNumber:
@@ -93,10 +91,8 @@ paths:
                   $ref: '#/definitions/procedureID'
                 title:
                   $ref: '#/definitions/title'
-                procedure:
-                  $ref: '#/definitions/procedure'
-                sourceIds:
-                  $ref: '#/definitions/sourceIds'
+                sourceList:
+                  $ref: '#/definitions/sourceList'
                 producedNumber:
                   $ref: '#/definitions/producedNumber'
                 restNumber:
@@ -247,7 +243,7 @@ definitions:
     example: "133450"
   phid:
     name: phid
-    description: Product ID
+    description: Product History ID
     example: "47246"
   organizationID: 
     name: organizationID
@@ -265,17 +261,19 @@ definitions:
     example: "原料倉領貨作業(原料倉)"
   title:
     example: "紅茶 (茶湯)"
-  sourceIds:
+  sourceList:
     type: array
     items:
       type: object
       properties:
+        shid:
+          $ref: '#/definitions/shid'
         phid:
           $ref: '#/definitions/phid'
         number:
-          type: integer
+          type: string
           example: "1122"
-    example: [{"phid": "12345", "number": "200 G"}, {"phid": "12234", "number": "500 ML"}]
+    example: [{"shid": "12343", "phid": "12345", "number": "200 G"}, {"shid": "5555", "phid": "12234", "number": "500 ML"}]
   producedNumber: 
     example: 15000 ML
   soldNumber: 
