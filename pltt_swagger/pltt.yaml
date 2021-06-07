@@ -288,7 +288,7 @@ definitions:
     example: ["https://s3.hicloud.net.tw/foodcloud/nvr/908/133092.mp4"]
   sensorDataURLs:
     type: array
-    example: ["https://www.aptbee.com/c?PRO=auto.ShowHChart_T&i=00124B000A94F821o_o1&key=%2FrwiD0GQyQuM1ubX7zDhO0L8HRxm9bpxHBXMO%2FnM69Xey2Xpy3Xp7C0QGNN%2FCQui&tkey=1562515200&startDate=2020%2F11%2F06+16%3A43%3A04&endDate=2020%2F11%2F06+16%3A43%3A17"]
+    example: ["https://s3.hicloud.net.tw/foodcloud/data/102834908235.zip"]
   txid:
     examlpe: "0xca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
   lastTx:
