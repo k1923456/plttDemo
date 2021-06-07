@@ -8,41 +8,6 @@ tags:
 - name: "pltt"
   description: "PLTT API list"
 paths:
-  # /object/{oid}:
-  #   get:
-  #     tags:
-  #     - "pltt"
-  #     summary: Get Object Data
-  #     parameters:
-  #       - $ref: '#/definitions/oid'
-  #     responses:
-  #       "200":
-  #         description: normal status
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: array
-  #               items:
-  #                 type: object
-  #                 properties:
-  #                   oid:
-  #                     $ref: '#/definitions/oid'
-  #                   phid:
-  #                     $ref: '#/definitions/phid'
-  #                   title:
-  #                     $ref: '#/definitions/title'
-  #                   startTime:
-  #                     $ref: '#/definitions/startTime'
-  #                   endTime:
-  #                     $ref: '#/definitions/endTime'
-  #                   txid:
-  #                     $ref: '#/definitions/txid'
-  #                   lastTx:
-  #                     $ref: '#/definitions/lastTx'
-  #                   nextTx:
-  #                     $ref: '#/definitions/nextTx'
-  #                   mediaList:
-  #                     $ref: '#/definitions/mediaList'
   /object:
     post:
       tags:
@@ -55,10 +20,14 @@ paths:
             schema:
               type: object
               properties:
-                oid:
-                  $ref: '#/definitions/oid'
+                shid:
+                  $ref: '#/definitions/shid'
                 phid:
                   $ref: '#/definitions/phid'
+                organizationID:
+                  $ref: '#/definitions/organizationID'
+                procedureID:
+                  $ref: '#/definitions/procedureID'
                 title:
                   $ref: '#/definitions/title'
                 procedure:
@@ -69,10 +38,8 @@ paths:
                   $ref: '#/definitions/producedNumber'
                 restNumber:
                   $ref: '#/definitions/restNumber'
-                startTime:
-                  $ref: '#/definitions/startTime'
-                endTime:
-                  $ref: '#/definitions/endTime'
+                expirationDate:
+                  $ref: '#/definitions/expirationDate'
                 mediaList:
                   $ref: '#/definitions/mediaList'
                 sensorDataURLs:
@@ -95,7 +62,7 @@ paths:
                 type: object
                 propertires:
                 example:
-                  msg: "Missing OID"
+                  msg: "Missing SHID o PHID"
         "500":
           description: Server Error
           content:
@@ -116,10 +83,14 @@ paths:
             schema:
               type: object
               properties:
-                oid:
-                  $ref: '#/definitions/oid'
+                shid:
+                  $ref: '#/definitions/shid'
                 phid:
                   $ref: '#/definitions/phid'
+                organizationID:
+                  $ref: '#/definitions/organizationID'
+                procedureID:
+                  $ref: '#/definitions/procedureID'
                 title:
                   $ref: '#/definitions/title'
                 procedure:
@@ -130,10 +101,8 @@ paths:
                   $ref: '#/definitions/producedNumber'
                 restNumber:
                   $ref: '#/definitions/restNumber'
-                startTime:
-                  $ref: '#/definitions/startTime'
-                endTime:
-                  $ref: '#/definitions/endTime'
+                expirationDate:
+                  $ref: '#/definitions/expirationDate'
                 mediaList:
                   $ref: '#/definitions/mediaList'
                 sensorDataURLs:
@@ -156,7 +125,111 @@ paths:
                 type: object
                 propertires:
                 example:
-                  msg: "Missing OID"
+                  msg: "Missing SHID or PHID"
+        "500":
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Internal Server Error"
+
+  /transaction:
+    post:
+      tags:
+      - "pltt"
+      summary: Transact a Object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shid:
+                  $ref: '#/definitions/shid'
+                phid:
+                  $ref: '#/definitions/phid'
+                organizationID:
+                  $ref: '#/definitions/organizationID'
+                ownerID:
+                  $ref: '#/definitions/ownerID'
+                soldNumber:
+                  $ref: '#/definitions/soldNumber'
+                transactionDate:
+                  $ref: '#/definitions/transactionDate'
+      responses:
+        "201":
+          description: Successfully Call
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Success"
+        "400":
+          description: User Body Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Missing SHID o PHID"
+        "500":
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Internal Server Error"
+    put:
+      tags:
+      - "pltt"
+      summary: Update Object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shid:
+                  $ref: '#/definitions/shid'
+                phid:
+                  $ref: '#/definitions/phid'
+                organizationID:
+                  $ref: '#/definitions/organizationID'
+                ownerID:
+                  $ref: '#/definitions/ownerID'
+                soldNumber:
+                  $ref: '#/definitions/soldNumber'
+                transactionDate:
+                  $ref: '#/definitions/transactionDate'
+      responses:
+        "201":
+          description: Successfully Call
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Success"
+        "400":
+          description: User Body Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Missing SHID or PHID"
         "500":
           description: Server Error
           content:
@@ -168,26 +241,51 @@ paths:
                   msg: "Internal Server Error"
 
 definitions:
-  oid:
-    name: oid
+  shid:
+    name: shid
+    description: Single History ID
     example: "133450"
   phid:
+    name: phid
     description: Product ID
-    example: null
-  title:
-    example: "紅茶 (茶湯)"
+    example: "47246"
+  organizationID: 
+    name: organizationID
+    description: Orgnization ID
+    example: "1234"
+  procedureID:
+    name: procedureID
+    description: Procedure ID
+    example: "2345"
+  ownerID:
+    name: ownerID
+    description: Procedure ID
+    example: "23456"
   procedure:
     example: "原料倉領貨作業(原料倉)"
+  title:
+    example: "紅茶 (茶湯)"
   sourceIds:
-    example: ["47246"]
+    type: array
+    items:
+      type: object
+      properties:
+        phid:
+          $ref: '#/definitions/phid'
+        number:
+          type: integer
+          example: "1122"
+    example: [{"phid": "12345", "number": "200 G"}, {"phid": "12234", "number": "500 ML"}]
   producedNumber: 
     example: 15000 ML
+  soldNumber: 
+    example: 5000 ML
   restNumber:
-    example:  15000 ML
-  startTime:
+    example:  10000 ML
+  expirationDate:
     example: "2020-11-06 16:43:04"
-  endTime:
-    example: "2020-11-06 16:43:17"
+  transactionDate:
+    example: "2020-12-21 16:43:17"
   mediaList:
     example: ["https://s3.hicloud.net.tw/foodcloud/nvr/908/133092.mp4"]
   sensorDataURLs:
