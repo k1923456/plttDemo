@@ -30,8 +30,6 @@ paths:
                   $ref: '#/definitions/procedureID'
                 title:
                   $ref: '#/definitions/title'
-                procedure:
-                  $ref: '#/definitions/procedure'
                 sourceIds:
                   $ref: '#/definitions/sourceIds'
                 producedNumber:
@@ -93,8 +91,6 @@ paths:
                   $ref: '#/definitions/procedureID'
                 title:
                   $ref: '#/definitions/title'
-                procedure:
-                  $ref: '#/definitions/procedure'
                 sourceIds:
                   $ref: '#/definitions/sourceIds'
                 producedNumber:
