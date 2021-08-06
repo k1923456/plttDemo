@@ -22,12 +22,14 @@ paths:
               properties:
                 shid:
                   $ref: '#/definitions/shid'
-                phid:
-                  $ref: '#/definitions/phid'
                 organizationID:
                   $ref: '#/definitions/organizationID'
+                organizationName:
+                  $ref: '#/definitions/organizationName'
                 procedureID:
                   $ref: '#/definitions/procedureID'
+                procedureName:
+                  $ref: '#/definitions/procedureName'
                 title:
                   $ref: '#/definitions/title'
                 sourceList:
@@ -35,7 +37,11 @@ paths:
                 producedNumber:
                   $ref: '#/definitions/producedNumber'
                 restNumber:
-                  $ref: '#/definitions/restNumberSame'
+                  $ref: '#/definitions/restNumber2'
+                packNumber:
+                  $ref: '#/definitions/packNumber'
+                producedDate:
+                  $ref: '#/definitions/producedDate'
                 expirationDate:
                   $ref: '#/definitions/expirationDate'
                 mediaList:
@@ -83,12 +89,14 @@ paths:
               properties:
                 shid:
                   $ref: '#/definitions/shid'
-                phid:
-                  $ref: '#/definitions/phid'
                 organizationID:
                   $ref: '#/definitions/organizationID'
+                organizationName:
+                  $ref: '#/definitions/organizationName'
                 procedureID:
                   $ref: '#/definitions/procedureID'
+                procedureName:
+                  $ref: '#/definitions/procedureName'
                 title:
                   $ref: '#/definitions/title'
                 sourceList:
@@ -96,7 +104,11 @@ paths:
                 producedNumber:
                   $ref: '#/definitions/producedNumber'
                 restNumber:
-                  $ref: '#/definitions/restNumber'
+                  $ref: '#/definitions/restNumber2'
+                packNumber:
+                  $ref: '#/definitions/packNumber'
+                producedDate:
+                  $ref: '#/definitions/producedDate'
                 expirationDate:
                   $ref: '#/definitions/expirationDate'
                 mediaList:
@@ -150,10 +162,16 @@ paths:
                   $ref: '#/definitions/phid'
                 organizationID:
                   $ref: '#/definitions/organizationID'
+                organizationName:
+                  $ref: '#/definitions/organizationName'
                 ownerID:
                   $ref: '#/definitions/ownerID'
+                ownerName:
+                  $ref: '#/definitions/ownerName'
                 soldNumber:
                   $ref: '#/definitions/soldNumber'
+                soldPack:
+                  $ref: '#/definitions/soldPack'
                 transactionDate:
                   $ref: '#/definitions/transactionDate'
       responses:
@@ -201,10 +219,16 @@ paths:
                   $ref: '#/definitions/phid'
                 organizationID:
                   $ref: '#/definitions/organizationID'
+                organizationName:
+                  $ref: '#/definitions/organizationName'
                 ownerID:
                   $ref: '#/definitions/ownerID'
+                ownerName:
+                  $ref: '#/definitions/ownerName'
                 soldNumber:
                   $ref: '#/definitions/soldNumber'
+                soldPack:
+                  $ref: '#/definitions/soldPack'
                 transactionDate:
                   $ref: '#/definitions/transactionDate'
       responses:
@@ -249,6 +273,10 @@ definitions:
     name: organizationID
     description: Orgnization ID
     example: "1234"
+  organizationName: 
+    name: organizationName
+    description: Orgnization Name
+    example: "8D Tea"
   procedureID:
     name: procedureID
     description: Procedure ID
@@ -257,7 +285,13 @@ definitions:
     name: ownerID
     description: Procedure ID
     example: "23456"
-  procedure:
+  ownerName: 
+    name: ownerName
+    description: Owner Name
+    example: "一般消費者"
+  procedureName:
+    name: procedureName
+    description: procedure Name
     example: "原料倉領貨作業(原料倉)"
   title:
     example: "紅茶 (茶湯)"
@@ -276,12 +310,18 @@ definitions:
     example: [{"shid": "12343", "phid": "12345", "number": "200 G"}, {"shid": "5555", "phid": "12234", "number": "500 ML"}]
   producedNumber: 
     example: 15000 ML
+  packNumber: 
+    example: "15"
   soldNumber: 
     example: 5000 ML
+  soldPack: 
+    example: "5"
   restNumber:
     example:  10000 ML
-  restNumberSame:
+  restNumber2:
     example:  15000 ML
+  producedDate:
+    example: "2020-11-01 16:43:04"
   expirationDate:
     example: "2020-11-06 16:43:04"
   transactionDate:

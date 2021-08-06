@@ -58,6 +58,44 @@ app.put('/object', (req, res) => {
   }
 })
 
+app.post('/transaction', (req, res) => {
+  try {
+    console.log("POST")
+    if (!req.body.oid) {
+      res.status(400).send({ msg: 'Missing OID' })
+    }
+    if (fs.existsSync(req.body.oid)) {
+      res.status(400).send({ msg: `ID ${req.body.oid} existed` })
+    }
+    req.body.txid = crypto.createHash('sha256').update(JSON.stringify(req.body)).digest('hex')
+    req.body.last_tx = null
+    req.body.next_tx = null
+    const records = [req.body]
+    fs.writeFileSync(req.body.oid, JSON.stringify(records))
+    res.send({ msg: 'Success' })
+  } catch (e) {
+    res.status(500).send({ msg: 'Internal Server Error' })
+  }
+})
+
+app.put('/transaction', (req, res) => {
+  try {
+    console.log("PUT")
+    if (!req.body.oid) {
+      res.status(400).send({ msg: 'Missing OID' })
+    }
+    if (!fs.existsSync(req.body.oid)) {
+      res.status(400).send({ msg: `ID ${req.body.oid} doesn't existed` })
+    }
+    const records = JSON.parse(fs.readFileSync(req.body.oid))
+    records.push(req.body)
+    fs.writeFileSync(req.body.oid, JSON.stringify(records))
+    res.send({ msg: 'Success' })
+  } catch (e) {
+    res.status(500).send({ msg: 'Internal Server Error' })
+  }
+})
+
 app.listen(port, () => {
   console.log(`Example app listening at http://0.0.0.0:${port}`)
 })
