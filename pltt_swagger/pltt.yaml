@@ -3,16 +3,16 @@ info:
   version: 0.0.1
   title: PLTT API
 servers:
-  - url: http://192.168.21.126:23456
+  - url: http://127.0.0.1:23456
 tags:
 - name: "pltt"
   description: "PLTT API list"
 paths:
-  /object:
+  /item:
     post:
       tags:
       - "pltt"
-      summary: Create Object
+      summary: Create Item
       requestBody:
         required: true
         content:
@@ -26,10 +26,6 @@ paths:
                   $ref: '#/definitions/organizationID'
                 organizationName:
                   $ref: '#/definitions/organizationName'
-                procedureID:
-                  $ref: '#/definitions/procedureID'
-                procedureName:
-                  $ref: '#/definitions/procedureName'
                 title:
                   $ref: '#/definitions/title'
                 sourceList:
@@ -44,6 +40,115 @@ paths:
                   $ref: '#/definitions/producedDate'
                 expirationDate:
                   $ref: '#/definitions/expirationDate'
+      responses:
+        "201":
+          description: Successfully Call
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Success"
+        "400":
+          description: User Body Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Missing SHID o PHID"
+        "500":
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Internal Server Error"
+    put:
+      tags:
+      - "pltt"
+      summary: Update Item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shid:
+                  $ref: '#/definitions/shid'
+                organizationID:
+                  $ref: '#/definitions/organizationID'
+                organizationName:
+                  $ref: '#/definitions/organizationName'
+                title:
+                  $ref: '#/definitions/title'
+                sourceList:
+                  $ref: '#/definitions/sourceList'
+                producedNumber:
+                  $ref: '#/definitions/producedNumber'
+                restNumber:
+                  $ref: '#/definitions/restNumber2'
+                packNumber:
+                  $ref: '#/definitions/packNumber'
+                producedDate:
+                  $ref: '#/definitions/producedDate'
+                expirationDate:
+                  $ref: '#/definitions/expirationDate'
+      responses:
+        "201":
+          description: Successfully Call
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Success"
+        "400":
+          description: User Body Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Missing SHID or PHID"
+        "500":
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  msg: "Internal Server Error"
+  /procedure:
+    post:
+      tags:
+      - "pltt"
+      summary: Add a procedure to a item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shid:
+                  $ref: '#/definitions/shid'
+                procedureID:
+                  $ref: '#/definitions/procedureID'
+                procedureName:
+                  $ref: '#/definitions/procedureName'
+                startTime:
+                  $ref: '#/definitions/startTime'
+                endTime:
+                  $ref: '#/definitions/endTime'
                 mediaList:
                   $ref: '#/definitions/mediaList'
                 sensorDataURLs:
@@ -89,28 +194,14 @@ paths:
               properties:
                 shid:
                   $ref: '#/definitions/shid'
-                organizationID:
-                  $ref: '#/definitions/organizationID'
-                organizationName:
-                  $ref: '#/definitions/organizationName'
                 procedureID:
                   $ref: '#/definitions/procedureID'
                 procedureName:
                   $ref: '#/definitions/procedureName'
-                title:
-                  $ref: '#/definitions/title'
-                sourceList:
-                  $ref: '#/definitions/sourceList'
-                producedNumber:
-                  $ref: '#/definitions/producedNumber'
-                restNumber:
-                  $ref: '#/definitions/restNumber2'
-                packNumber:
-                  $ref: '#/definitions/packNumber'
-                producedDate:
-                  $ref: '#/definitions/producedDate'
-                expirationDate:
-                  $ref: '#/definitions/expirationDate'
+                startTime:
+                  $ref: '#/definitions/startTime'
+                endTime:
+                  $ref: '#/definitions/endTime'
                 mediaList:
                   $ref: '#/definitions/mediaList'
                 sensorDataURLs:
@@ -143,7 +234,6 @@ paths:
                 propertires:
                 example:
                   msg: "Internal Server Error"
-
   /transaction:
     post:
       tags:
@@ -259,7 +349,6 @@ paths:
                 propertires:
                 example:
                   msg: "Internal Server Error"
-
 definitions:
   shid:
     name: shid
@@ -324,6 +413,10 @@ definitions:
     example: "2020-11-01 16:43:04"
   expirationDate:
     example: "2020-11-06 16:43:04"
+  startTime:
+    example: "2020-11-22 16:43:04"
+  endTime:
+    example: "2020-11-23 16:43:04"
   transactionDate:
     example: "2020-12-21 16:43:17"
   mediaList:
