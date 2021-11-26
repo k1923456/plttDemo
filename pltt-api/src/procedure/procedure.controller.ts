@@ -1,11 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { EthersService } from '../ethers/ethers.service';
 import { ProcedureService } from './procedure.service';
 import { CreateProcedureDto } from './dto/create-procedure.dto';
 import { UpdateProcedureDto } from './dto/update-procedure.dto';
 
 @Controller('procedure')
 export class ProcedureController {
-  constructor(private readonly procedureService: ProcedureService) {}
+  constructor(private readonly procedureService: ProcedureService, private ethersService: EthersService) {}
 
   @Post()
   create(@Body() createProcedureDto: CreateProcedureDto) {
@@ -23,7 +32,10 @@ export class ProcedureController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProcedureDto: UpdateProcedureDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateProcedureDto: UpdateProcedureDto,
+  ) {
     return this.procedureService.update(+id, updateProcedureDto);
   }
 
