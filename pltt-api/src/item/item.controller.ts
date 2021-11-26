@@ -20,6 +20,12 @@ export class ItemController {
   async create(@Body() createItemDto: CreateItemDto) {
     // return this.itemService.create(createItemDto);
     console.log(this.ethersService.generateAddress(createItemDto.shid.toString()));
+    // let organizationAddress = await findOne(createItemDto.organizationID);
+    // if (!organizationAddress) {
+    //   const newOrganizationAddress = this.ethersService.generateAddress(createItemDto.organizationID.toString());
+    //   await this.itemService.create(createItemDto.organizationID, newOrganizationAddress)
+    //   organizationAddress = newOrganizationAddress;
+    // }
     await this.ethersService.createItem(createItemDto);
   }
 

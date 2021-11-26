@@ -17,6 +17,7 @@ export class EthersService {
     }
 
     generateAddress(id: string) {
+      console.log(ethers.Wallet.createRandom(id)._signingKey());
       return ethers.Wallet.createRandom(id).address;
     }
 
