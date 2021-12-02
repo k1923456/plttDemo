@@ -7,13 +7,14 @@ import { ItemData, ItemQuantity } from './schemas/item.schema';
 
 @Injectable()
 export class EthersService {
-  etherProvider: ethers.providers.BaseProvider;
+  etherProvider;
   traceableObjectJSON;
   itemJSON;
   productJSON;
 
   constructor() {
-    this.etherProvider = ethers.getDefaultProvider(process.env.URL);
+    // this.etherProvider = ethers.getDefaultProvider(process.env.URL);
+    this.etherProvider = new ethers.providers.JsonRpcProvider(process.env.URL);
     this.traceableObjectJSON = JSON.parse(
       readFileSync(process.env.TRACEABLE_OBJECT_JSON_PATH).toString(),
     );
@@ -25,9 +26,12 @@ export class EthersService {
     );
   }
 
-  generateAccount(id: string) {
+  async generateAccount(id: string) {
     console.log(ethers.Wallet.createRandom(id)._signingKey());
-    return ethers.Wallet.createRandom(id);
+    const wallet = ethers.Wallet.createRandom(id);
+    const balancer1 = this.etherProvider.getSigner();
+    console.log(`Balancer1 ${await balancer1.getAddress()} has ${await balancer1.getBalance()} ETH`)
+    return wallet.connect(this.etherProvider);
   }
 
   getSigner(privateKey: string) {
@@ -69,9 +73,9 @@ export class EthersService {
     sourceList,
     signer: Wallet,
   ) {
-
     const {itemData, itemQuantity, itemSourceList} = this.generateItemData(createItemDto, signer.address, sourceList);
     const itemFactory = await this.getItemContractFactory();
+    console.log("AAAAAAAAAA")
     const item = await itemFactory
       .connect(signer)
       .deploy(itemData, itemQuantity);

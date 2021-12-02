@@ -18,7 +18,7 @@ export class ItemController {
     );
 
     if (organizationData === null) {
-      return this.ethersService.generateAccount(
+      return await this.ethersService.generateAccount(
         createItemDto.organizationID.toString(),
       );
     } else {
@@ -69,7 +69,7 @@ export class ItemController {
 
     // // Save all Data
     await this.itemService.createItem(createItemDto, itemAddress);
-    await this.itemService.createOrganization(createItemDto, wallet.privateKey);
+    await this.itemService.createOrganization(createItemDto, wallet._signingKey().privateKey);
     
   }
 
