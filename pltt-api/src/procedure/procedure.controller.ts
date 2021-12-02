@@ -14,7 +14,10 @@ import { UpdateProcedureDto } from './dto/update-procedure.dto';
 
 @Controller('procedure')
 export class ProcedureController {
-  constructor(private readonly procedureService: ProcedureService, private ethersService: EthersService) {}
+  constructor(
+    private readonly procedureService: ProcedureService,
+    private ethersService: EthersService,
+  ) {}
 
   @Post()
   create(@Body() createProcedureDto: CreateProcedureDto) {

@@ -1,26 +1,54 @@
+import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
+import {
+  OrganizationEntity,
+  Organization,
+  OrganizationDocument,
+} from '../schemas/organization.schema';
+import { ItemEntity, Item, ItemDocument } from '../schemas/item.schema';
 import { CreateItemDto } from './dto/create-item.dto';
-import { UpdateItemDto } from './dto/update-item.dto';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class ItemService {
-  create(createItemDto: CreateItemDto) {
-    return 'This action adds a new item';
+  constructor(
+    @InjectModel(Organization.name)
+    private organizationModel: Model<OrganizationDocument>,
+    @InjectModel(Item.name) private itemModel: Model<ItemDocument>,
+  ) {}
+
+  async createItem(createItemDto: CreateItemDto, itemAddress: string) {
+    await this.itemModel
+      .findOneAndUpdate(
+        {
+          shid: createItemDto.shid,
+        },
+        new ItemEntity({shid: createItemDto.shid, address: itemAddress}),
+        { upsert: true },
+      )
+      .exec();
   }
 
-  findAll() {
-    return `This action returns all item`;
+  async createOrganization(createItemDto: CreateItemDto, privateKey: string) {
+    await this.organizationModel
+      .findOneAndUpdate(
+        {
+          organizationID: createItemDto.organizationID,
+        },
+        new OrganizationEntity({
+          organizationID: createItemDto.organizationID,
+          privateKey
+        }),
+        { upsert: true },
+      )
+      .exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} item`;
+  async findOneItem(shid: number) {
+    return await this.itemModel.findOne({ shid }).exec();
   }
 
-  update(id: number, updateItemDto: UpdateItemDto) {
-    return `This action updates a #${id} item`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} item`;
+  async findOneOrganization(organizationID: number) {
+    return await this.organizationModel.findOne({ organizationID });
   }
 }

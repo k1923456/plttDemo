@@ -1,71 +1,115 @@
 import { Injectable } from '@nestjs/common';
-import { ethers } from 'ethers';
+import { ethers, Wallet } from 'ethers';
 import { readFileSync } from 'fs';
 import { CreateItemDto } from '../item/dto/create-item.dto';
+import { TraceData } from './schemas/trace-data.schema';
+import { ItemData, ItemQuantity } from './schemas/item.schema';
 
 @Injectable()
 export class EthersService {
-    etherProvider : ethers.providers.BaseProvider;
-    itemJSON;
-    productFactory : ethers.ContractFactory;
+  etherProvider: ethers.providers.BaseProvider;
+  traceableObjectJSON;
+  itemJSON;
+  productJSON;
 
-    constructor() {
-      this.etherProvider = ethers.getDefaultProvider(process.env.URL);
-      this.itemJSON = JSON.parse(readFileSync(process.env.ITEM_JSON_PATH).toString())
-    //   const productJSON = JSON.parse(readFileSync(process.env.PRODUCT_JSON_PATH).toString())
-    //   this.ProductABI = .abi;      
+  constructor() {
+    this.etherProvider = ethers.getDefaultProvider(process.env.URL);
+    this.traceableObjectJSON = JSON.parse(
+      readFileSync(process.env.TRACEABLE_OBJECT_JSON_PATH).toString(),
+    );
+    this.itemJSON = JSON.parse(
+      readFileSync(process.env.ITEM_JSON_PATH).toString(),
+    );
+    this.productJSON = JSON.parse(
+      readFileSync(process.env.PRODUCT_JSON_PATH).toString(),
+    );
+  }
+
+  generateAccount(id: string) {
+    console.log(ethers.Wallet.createRandom(id)._signingKey());
+    return ethers.Wallet.createRandom(id);
+  }
+
+  getSigner(privateKey: string) {
+    return new ethers.Wallet(privateKey, this.etherProvider);
+  }
+
+  async getItemContractFactory(): Promise<ethers.ContractFactory> {
+    return await new ethers.ContractFactory(
+      this.itemJSON.abi,
+      this.itemJSON.bytecode,
+    );
+  }
+
+  async getProductContractFactory(): Promise<ethers.ContractFactory> {
+    return await new ethers.ContractFactory(
+      this.productJSON.abi,
+      this.productJSON.bytecode,
+    );
+  }
+
+  generateItemData(createItemDto: CreateItemDto, organization: string, sourceList) {
+    console.log({...createItemDto, organization})
+    const itemData = new ItemData({...createItemDto, organization})
+    console.log(itemData)
+    const itemQuantity = new ItemQuantity(createItemDto)
+    console.log(itemQuantity)
+    const itemSourceList: TraceData[] = [];
+    for (let i = 0; i < sourceList.length; i++) {
+      itemSourceList.push(new TraceData(sourceList[i]));
+      console.log(itemSourceList)
     }
+    console.log(itemSourceList)
 
-    generateAddress(id: string) {
-      console.log(ethers.Wallet.createRandom(id)._signingKey());
-      return ethers.Wallet.createRandom(id).address;
+    return { itemData, itemQuantity, itemSourceList }
+  }
+
+  async createItem(
+    createItemDto: CreateItemDto,
+    sourceList,
+    signer: Wallet,
+  ) {
+
+    const {itemData, itemQuantity, itemSourceList} = this.generateItemData(createItemDto, signer.address, sourceList);
+    const itemFactory = await this.getItemContractFactory();
+    const item = await itemFactory
+      .connect(signer)
+      .deploy(itemData, itemQuantity);
+    console.log('---------------------------------------------')
+    console.log(
+      `Deployed item contract ${item.address}, Organization is ${signer.address}`,
+    );
+    for (let i = 0; i < itemSourceList.length; i++) {
+      const sourceItem = await itemFactory.attach(itemSourceList[i].usedObject);
+      await sourceItem.addDests([item.address]);
+      console.log(`Source ${sourceItem.address} add ${item.address} as dest`);
     }
+    await item.addSources(itemSourceList);
+    console.log(`SourceList ${sourceList.toString()} is added to ${item.address}`);
+    console.log('---------------------------------------------')
 
-    async getItemContractFactory(): Promise<ethers.ContractFactory> {
-        return await new ethers.ContractFactory(this.itemJSON.abi, this.itemJSON.bytecode);
-    }
-    
-    async getFirstAccountBalance(): Promise<string> {
-      const balanceBN =  await this.etherProvider.getBalance('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
-      return balanceBN.toString();
-    }
+    return item.address;
+  }
 
-    async createItem(createItemDto: CreateItemDto) {
-        const itemData = {
-            shid: 1234,
-            organizationID: 1,
-            producedDate: 1637857385,
-            expirationDate: 2637857385,
-            organization: "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
-            name: "茶葉",
-            organizationName: "8D Tea",
-          };
-          const number = 1500;
-          const packnumber = 5;
-          const unit = "ML";
-        const itemFactory = await this.getItemContractFactory();
-        const signer = new ethers.Wallet('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80', this.etherProvider)
-        const item = await itemFactory.connect(signer).deploy(itemData, number, packnumber, unit);
-        console.log(`Deployed item contract ${item.address}, Organization is ${(await item.itemData()).organization}`)
-    }
+  async modifyItem(
+    createItemDto: CreateItemDto,
+    signer: Wallet,
+  ) {
+    // const itemFactory = await this.getItemContractFactory();
+    // const item = await itemFactory
+    //   .attach(itemAddress)
+    //   .connect(signer)
+    //   .modify(itemData, itemQuantity);
+    // console.log(
+    //   `Modified item contract ${item.address}, Organization is ${signer.address}`,
+    // );
+  }
 
-    async modifyItem() {
-        
-    }
+  async createProcedure() {}
 
-    async createProcedure() {
+  async modifyProcedure() {}
 
-    }
+  async createTransaction() {}
 
-    async modifyProcedure() {
-        
-    }
-
-    async createTransaction() {
-
-    }
-
-    async modifyTransaction() {
-
-    }
+  async modifyTransaction() {}
 }

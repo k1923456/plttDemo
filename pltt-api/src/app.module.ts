@@ -5,8 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { ItemModule } from './item/item.module';
 import { ProcedureModule } from './procedure/procedure.module';
-import { TransactionModule } from './transaction/transaction.module';
 import { EthersModule } from './ethers/ethers.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -16,8 +16,8 @@ import { EthersModule } from './ethers/ethers.module';
     ),
     ProcedureModule,
     ItemModule,
-    TransactionModule,
     EthersModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],

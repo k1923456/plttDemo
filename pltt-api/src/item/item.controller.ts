@@ -1,61 +1,88 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, HttpException, HttpStatus } from '@nestjs/common';
 import { ItemService } from './item.service';
+import { ProductService } from '../product/product.service';
 import { EthersService } from '../ethers/ethers.service';
 import { CreateItemDto } from './dto/create-item.dto';
-import { UpdateItemDto } from './dto/update-item.dto';
 
 @Controller('item')
 export class ItemController {
-  constructor(private readonly itemService: ItemService, private ethersService: EthersService) {}
+  constructor(
+    private readonly itemService: ItemService,
+    private readonly productService: ProductService,
+    private readonly ethersService: EthersService,
+  ) {}
+
+  async getWallet(createItemDto: CreateItemDto) {
+    const organizationData = await this.itemService.findOneOrganization(
+      createItemDto.organizationID,
+    );
+
+    if (organizationData === null) {
+      return this.ethersService.generateAccount(
+        createItemDto.organizationID.toString(),
+      );
+    } else {
+      return this.ethersService.getSigner(organizationData.privateKey);
+    }
+  }
+
+  async checkSourceList(createItemDto: CreateItemDto) {
+    const sourceList = [];
+    for (let i = 0; i < createItemDto.sourceList.length; i++) {
+      const sourceData = await this.itemService.findOneItem(createItemDto.sourceList[i].id)
+      const productData = await this.productService.findOneProduct(createItemDto.sourceList[i].id)
+      if (sourceData !== null) {
+        sourceList.push({
+          id: createItemDto.sourceList[i].id,
+          usedObject: sourceData.address,
+          usedNumber: createItemDto.sourceList[i].usedNumber,
+          isDeleted: false
+        })
+      }
+      else if (productData !== null) {
+        sourceList.push({
+          id: createItemDto.sourceList[i].id,
+          usedObject: productData.address,
+          usedNumber: createItemDto.sourceList[i].usedNumber,
+          isDeleted: false
+        })
+      } else {
+        throw new HttpException(`Source Item ${createItemDto.sourceList[i].id} is not deployed`, HttpStatus.BAD_REQUEST);
+      }
+    }
+    return sourceList;
+  }
 
   @Post()
   async create(@Body() createItemDto: CreateItemDto) {
-    // return this.itemService.create(createItemDto);
-    console.log(this.ethersService.generateAddress(createItemDto.shid.toString()));
-    // let organizationAddress = await findOne(createItemDto.organizationID);
-    // if (!organizationAddress) {
-    //   const newOrganizationAddress = this.ethersService.generateAddress(createItemDto.organizationID.toString());
-    //   await this.itemService.create(createItemDto.organizationID, newOrganizationAddress)
-    //   organizationAddress = newOrganizationAddress;
-    // }
-    await this.ethersService.createItem(createItemDto);
-  }
+    // Check Organization Existed
+    const wallet = await this.getWallet(createItemDto);
 
-  @Get()
-  async findAll() {
-    // console.log(`asdfasdfsadf ${await this.ethersService.getFirstAccountBalance()}`)
-    // console.log(`${await this.appService.getHello()}`)
-    return this.itemService.findAll();
-  }
+    // Check item existed and sources Existed
+    let sourceList = [];
+    if (createItemDto.sourceList !== undefined) {
+      sourceList = await this.checkSourceList(createItemDto);
+    }
+    console.log("AAA")
+    // Create item    
+    const itemAddress = await this.ethersService.createItem(createItemDto, sourceList, wallet);
 
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<any> {
+    // // Save all Data
+    await this.itemService.createItem(createItemDto, itemAddress);
+    await this.itemService.createOrganization(createItemDto, wallet.privateKey);
     
-    return new Promise(resolve => {
-      setTimeout(() => {
-        console.log(this.itemService.findOne(+id));
-        resolve("SUCCESS");
-      }, 3000);
-    });
-
-    // return this.itemService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateItemDto: UpdateItemDto) {
-    return this.itemService.update(+id, updateItemDto);
-  }
+  @Put()
+  async update(@Body() createItemDto: CreateItemDto) {
+    // Check Organization Existed
+    const wallet = await this.getWallet(createItemDto);
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.itemService.remove(+id);
+    // Update item    
+    const itemAddress = await this.ethersService.modifyItem(createItemDto, wallet);
+
+    // // Save all Data
+    // await this.itemService.createItem(createItemDto, itemAddress);
+    // await this.itemService.createOrganization(createItemDto, wallet.privateKey);
   }
 }

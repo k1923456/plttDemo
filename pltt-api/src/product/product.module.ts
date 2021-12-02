@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { ItemService } from './item.service';
-import { ProductService } from '../product/product.service'
-import { ItemController } from './item.controller';
+import { ProductService } from './product.service';
+import { ProductController } from './product.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   Organization,
   OrganizationSchema,
 } from '../schemas/organization.schema';
-import { Item, ItemSchema } from '../schemas/item.schema';
 import { Product, ProductSchema } from '../schemas/product.schema';
+import { ItemService } from '../item/item.service';
+import { Item, ItemSchema } from '../schemas/item.schema';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { Product, ProductSchema } from '../schemas/product.schema';
       { name: Product.name, schema: ProductSchema },
     ]),
   ],
-  controllers: [ItemController],
-  providers: [ItemService, ProductService],
+  controllers: [ProductController],
+  providers: [ProductService, ItemService]
 })
-export class ItemModule {}
+export class ProductModule {}
