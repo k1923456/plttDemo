@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, HttpException, HttpStatus, HttpCode } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { ProductService } from '../product/product.service';
 import { EthersService } from '../ethers/ethers.service';
@@ -54,6 +54,7 @@ export class ItemController {
   }
 
   @Post()
+  @HttpCode(204)
   async create(@Body() createItemDto: CreateItemDto) {
     // Check Organization Existed
     const wallet = await this.getWallet(createItemDto);
@@ -71,6 +72,7 @@ export class ItemController {
     await this.itemService.createItem(createItemDto, itemAddress);
     await this.itemService.createOrganization(createItemDto, wallet._signingKey().privateKey);
     
+    return "Success"
   }
 
   @Put()
