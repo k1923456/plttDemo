@@ -85,10 +85,10 @@ export class EthersService {
     );
     for (let i = 0; i < itemSourceList.length; i++) {
       const sourceItem = await itemFactory.attach(itemSourceList[i].usedObject);
-      await sourceItem.addDests([item.address]);
+      await sourceItem.addDests([item.address], {gasLimit: 3000000});
       console.log(`Source ${sourceItem.address} add ${item.address} as dest`);
     }
-    await item.addSources(itemSourceList);
+    await item.addSources(itemSourceList, {gasLimit: 3000000});
     console.log(`SourceList ${sourceList.toString()} is added to ${item.address}`);
     console.log('---------------------------------------------')
 
