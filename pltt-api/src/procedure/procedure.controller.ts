@@ -9,8 +9,7 @@ import {
 } from '@nestjs/common';
 import { EthersService } from '../ethers/ethers.service';
 import { ProcedureService } from './procedure.service';
-import { CreateProcedureDto } from './dto/create-procedure.dto';
-import { UpdateProcedureDto } from './dto/update-procedure.dto';
+import { ProcedureDto } from './dto/procedure.dto';
 
 @Controller('procedure')
 export class ProcedureController {
@@ -20,8 +19,8 @@ export class ProcedureController {
   ) {}
 
   @Post()
-  create(@Body() createProcedureDto: CreateProcedureDto) {
-    return this.procedureService.create(createProcedureDto);
+  create(@Body() procedureDto: ProcedureDto) {
+    return this.procedureService.create(procedureDto);
   }
 
   @Get()
@@ -35,11 +34,8 @@ export class ProcedureController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateProcedureDto: UpdateProcedureDto,
-  ) {
-    return this.procedureService.update(+id, updateProcedureDto);
+  update(@Param('id') id: string, @Body() procedureDto: ProcedureDto) {
+    return this.procedureService.update(+id, procedureDto);
   }
 
   @Delete(':id')

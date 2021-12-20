@@ -5,7 +5,11 @@ import {
   Organization,
   OrganizationDocument,
 } from '../schemas/organization.schema';
-import { ProductEntity, Product, ProductDocument } from '../schemas/product.schema';
+import {
+  ProductEntity,
+  Product,
+  ProductDocument,
+} from '../schemas/product.schema';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -16,7 +20,7 @@ export class ProductService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
   ) {}
 
-  async createProduct(productEntity: ProductEntity) {
+  async createProduct(productEntity: ProductEntity, itemAddress: string) {
     await this.productModel
       .findOneAndUpdate(
         {

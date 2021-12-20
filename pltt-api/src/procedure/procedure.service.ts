@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProcedureDto } from './dto/create-procedure.dto';
-import { UpdateProcedureDto } from './dto/update-procedure.dto';
+import { ProcedureDto } from './dto/procedure.dto';
 
 @Injectable()
 export class ProcedureService {
-  create(createProcedureDto: CreateProcedureDto) {
+  create(procedureDto: ProcedureDto) {
     return 'This action adds a new procedure';
   }
 
@@ -16,7 +15,7 @@ export class ProcedureService {
     return `This action returns a #${id} procedure`;
   }
 
-  update(id: number, updateProcedureDto: UpdateProcedureDto) {
+  update(id: number, procedureDto: ProcedureDto) {
     return `This action updates a #${id} procedure`;
   }
 

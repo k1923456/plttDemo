@@ -1,90 +1,103 @@
-import { Controller, Get, Post, Body, Put, HttpException, HttpStatus, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  HttpException,
+  HttpStatus,
+  Param,
+} from '@nestjs/common';
+import { ItemDto } from './dto/item.dto';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 import { ItemService } from './item.service';
-import { ProductService } from '../product/product.service';
-import { EthersService } from '../ethers/ethers.service';
-import { CreateItemDto } from './dto/create-item.dto';
 
 @Controller('item')
 export class ItemController {
   constructor(
     private readonly itemService: ItemService,
-    private readonly productService: ProductService,
-    private readonly ethersService: EthersService,
+    @InjectQueue('item') private itemQueue: Queue,
   ) {}
 
-  async getWallet(createItemDto: CreateItemDto) {
-    const organizationData = await this.itemService.findOneOrganization(
-      createItemDto.organizationID,
-    );
+  async AddItemJob(type: string, itemDto: ItemDto) {
+    return await this.itemQueue.add(type, {
+      itemDto,
+    });
+  }
 
-    if (organizationData === null) {
-      return await this.ethersService.generateAccount(
-        createItemDto.organizationID.toString(),
-      );
-    } else {
-      return this.ethersService.getSigner(organizationData.privateKey);
+  checkSourceList(itemDto: ItemDto) {
+    for (let i = 0; i < itemDto.sourceList.length; i++) {
+      if (
+        itemDto.sourceList[i].shid !== undefined &&
+        itemDto.sourceList[i].phid !== undefined
+      ) {
+        throw new HttpException(
+          `Source Item ${i} has both shid/phid`,
+          HttpStatus.BAD_REQUEST,
+        );
+      } else if (
+        itemDto.sourceList[i].shid === undefined &&
+        itemDto.sourceList[i].phid === undefined
+      ) {
+        throw new HttpException(
+          `Source Item ${i} missing one of shid/phid`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
   }
 
-  async checkSourceList(createItemDto: CreateItemDto) {
-    const sourceList = [];
-    for (let i = 0; i < createItemDto.sourceList.length; i++) {
-      const sourceData = await this.itemService.findOneItem(createItemDto.sourceList[i].id)
-      const productData = await this.productService.findOneProduct(createItemDto.sourceList[i].id)
-      if (sourceData !== null) {
-        sourceList.push({
-          id: createItemDto.sourceList[i].id,
-          usedObject: sourceData.address,
-          usedNumber: createItemDto.sourceList[i].usedNumber,
-          isDeleted: false
-        })
-      }
-      else if (productData !== null) {
-        sourceList.push({
-          id: createItemDto.sourceList[i].id,
-          usedObject: productData.address,
-          usedNumber: createItemDto.sourceList[i].usedNumber,
-          isDeleted: false
-        })
-      } else {
-        throw new HttpException(`Source Item ${createItemDto.sourceList[i].id} is not deployed`, HttpStatus.BAD_REQUEST);
-      }
+  @Get(':jobID')
+  async query(@Param() params) {
+    const job = await this.itemQueue.getJob(params.jobID);
+    if (job === null) {
+      throw new HttpException(
+        `Job ID ${params.jobID} not found`,
+        HttpStatus.NOT_FOUND,
+      );
     }
-    return sourceList;
+    const status = await job.getState();
+    let failedReason = '';
+    if (status === 'failed') {
+      failedReason = job.failedReason;
+    }
+
+    return {
+      jobID: params.jobID,
+      status,
+      failedReason,
+    };
   }
 
   @Post()
-  @HttpCode(204)
-  async create(@Body() createItemDto: CreateItemDto) {
-    // Check Organization Existed
-    const wallet = await this.getWallet(createItemDto);
-
-    // Check item existed and sources Existed
-    let sourceList = [];
-    if (createItemDto.sourceList !== undefined) {
-      sourceList = await this.checkSourceList(createItemDto);
+  async create(@Body() itemDto: ItemDto) {
+    const item = await this.itemService.findOneItem(itemDto.shid);
+    if (item !== null) {
+      throw new HttpException(`Item has been created`, HttpStatus.CONFLICT);
     }
-    console.log("AAA")
-    // Create item    
-    const itemAddress = await this.ethersService.createItem(createItemDto, sourceList, wallet);
 
-    // // Save all Data
-    await this.itemService.createItem(createItemDto, itemAddress);
-    await this.itemService.createOrganization(createItemDto, wallet._signingKey().privateKey);
-    
-    return "Success"
+    this.checkSourceList(itemDto);
+    const job = await this.AddItemJob('deployItem', itemDto);
+
+    return {
+      jobID: job.id,
+      status: 'active',
+    };
   }
 
   @Put()
-  async update(@Body() createItemDto: CreateItemDto) {
-    // Check Organization Existed
-    const wallet = await this.getWallet(createItemDto);
+  async update(@Body() itemDto: ItemDto) {
+    const item = await this.itemService.findOneItem(itemDto.shid);
+    if (item === null) {
+      throw new HttpException(`Item has not been created`, HttpStatus.CONFLICT);
+    }
+    this.checkSourceList(itemDto);
+    const job = await this.AddItemJob('modifyItem', itemDto);
 
-    // Update item    
-    const itemAddress = await this.ethersService.modifyItem(createItemDto, wallet);
-
-    // // Save all Data
-    // await this.itemService.createItem(createItemDto, itemAddress);
-    // await this.itemService.createOrganization(createItemDto, wallet.privateKey);
+    return {
+      jobID: job.id,
+      status: 'active',
+    };
   }
 }

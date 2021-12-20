@@ -1,35 +1,46 @@
 import { BigNumber } from '@ethersproject/bignumber';
 
-export class ItemData {
-  shid: BigNumber;
+export class ProductData {
+  phid: BigNumber;
   organizationID: BigNumber;
-  producedDate: BigNumber;
+  ownerID: BigNumber;
+  transactionDate: BigNumber;
   expirationDate: BigNumber;
   organization: string;
+  owner: string;
   name: string;
   organizationName: string;
+  ownerName: string;
 
   constructor(object) {
-    this.shid = BigNumber.from(object.shid);
+    this.phid = BigNumber.from(object.phid);
     this.organizationID = BigNumber.from(object.organizationID);
-    this.producedDate = BigNumber.from(Date.parse(object.producedDate) / 1000);
+    this.ownerID = BigNumber.from(object.ownerID);
+    this.transactionDate = BigNumber.from(
+      Date.parse(object.transactionDate) / 1000,
+    );
     this.expirationDate = BigNumber.from(
       Date.parse(object.expirationDate) / 1000,
     );
     this.organization = object.organization;
+    this.owner = object.owner;
     this.name = object.title;
     this.organizationName = object.organizationName;
+    this.ownerName = object.ownerName;
   }
 
   getObeject() {
     return {
-      shid: this.shid,
+      shid: this.phid,
       organizationID: this.organizationID,
-      producedDate: this.producedDate,
+      ownerID: this.ownerID,
+      transactionDate: this.transactionDate,
       expirationDate: this.expirationDate,
       organization: this.organization,
+      owner: this.owner,
       name: this.name,
       organizationName: this.organizationName,
+      ownerName: this.ownerName,
     };
   }
 }

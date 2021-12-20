@@ -9,6 +9,7 @@ import {
 import { Product, ProductSchema } from '../schemas/product.schema';
 import { ItemService } from '../item/item.service';
 import { Item, ItemSchema } from '../schemas/item.schema';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -17,8 +18,11 @@ import { Item, ItemSchema } from '../schemas/item.schema';
       { name: Item.name, schema: ItemSchema },
       { name: Product.name, schema: ProductSchema },
     ]),
+    BullModule.registerQueue({
+      name: 'itemContract',
+    }),
   ],
   controllers: [ProductController],
-  providers: [ProductService, ItemService]
+  providers: [ProductService, ItemService],
 })
 export class ProductModule {}

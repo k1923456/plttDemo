@@ -1,11 +1,11 @@
-class Source {
-  id: number;
+export class Source {
+  shid: number;
+  phid: number;
   usedNumber: number;
 }
 
-export class CreateItemDto {
+export class ItemDto {
   shid: number;
-  name: string;
   organizationID: number;
   organizationName: string;
   title: string;

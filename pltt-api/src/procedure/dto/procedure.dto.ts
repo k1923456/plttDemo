@@ -1,6 +1,6 @@
 import { BigNumber } from 'ethers';
 
-export class CreateProcedureDto {
+export class ProcedureDto {
   shid: number;
   procedureID: number;
   procedureName: string;

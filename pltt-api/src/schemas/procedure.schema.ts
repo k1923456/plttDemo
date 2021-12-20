@@ -17,8 +17,8 @@ export class ProcedureDataEntity {
     this.name = object.name;
     this.mediaList = object.mediaList;
     this.sensorList = object.sensorList;
-    this.startTime = BigNumber.from(Date.parse(object.startTime)/1000);
-    this.endTime = BigNumber.from(Date.parse(object.endTime)/1000);
+    this.startTime = BigNumber.from(Date.parse(object.startTime) / 1000);
+    this.endTime = BigNumber.from(Date.parse(object.endTime) / 1000);
   }
 }
 

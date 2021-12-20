@@ -6,7 +6,7 @@ import {
   OrganizationDocument,
 } from '../schemas/organization.schema';
 import { ItemEntity, Item, ItemDocument } from '../schemas/item.schema';
-import { CreateItemDto } from './dto/create-item.dto';
+import { ItemDto } from './dto/item.dto';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -17,27 +17,27 @@ export class ItemService {
     @InjectModel(Item.name) private itemModel: Model<ItemDocument>,
   ) {}
 
-  async createItem(createItemDto: CreateItemDto, itemAddress: string) {
+  async createItem(itemDto: ItemDto, itemAddress: string) {
     await this.itemModel
       .findOneAndUpdate(
         {
-          shid: createItemDto.shid,
+          shid: itemDto.shid,
         },
-        new ItemEntity({shid: createItemDto.shid, address: itemAddress}),
+        new ItemEntity({ shid: itemDto.shid, address: itemAddress }),
         { upsert: true },
       )
       .exec();
   }
 
-  async createOrganization(createItemDto: CreateItemDto, privateKey: string) {
+  async createOrganization(itemDto: ItemDto, privateKey: string) {
     await this.organizationModel
       .findOneAndUpdate(
         {
-          organizationID: createItemDto.organizationID,
+          organizationID: itemDto.organizationID,
         },
         new OrganizationEntity({
-          organizationID: createItemDto.organizationID,
-          privateKey
+          organizationID: itemDto.organizationID,
+          privateKey,
         }),
         { upsert: true },
       )

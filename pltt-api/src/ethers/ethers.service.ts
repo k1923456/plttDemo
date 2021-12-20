@@ -1,9 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ethers, Wallet } from 'ethers';
 import { readFileSync } from 'fs';
-import { CreateItemDto } from '../item/dto/create-item.dto';
-import { TraceData } from './schemas/trace-data.schema';
-import { ItemData, ItemQuantity } from './schemas/item.schema';
+import { ItemDto } from '../item/dto/item.dto';
+import { ProcedureDto } from '../procedure/dto/procedure.dto';
+import { ProductDto } from '../product/dto/product.dto';
+import { ItemData } from './schemas/item.schema';
+import { ProcedureData } from './schemas/procedure.schema';
+import { ProductData } from './schemas/product.schema';
+import { TraceData } from './schemas/traceData.schema';
+import { Quantity } from './schemas/quantity.schema';
+import { ItemService } from '../item/item.service';
+import { ProductService } from '../product/product.service';
+import e from 'express';
 
 @Injectable()
 export class EthersService {
@@ -13,107 +21,170 @@ export class EthersService {
   productJSON;
 
   constructor() {
-    // this.etherProvider = ethers.getDefaultProvider(process.env.URL);
     this.etherProvider = new ethers.providers.JsonRpcProvider(process.env.URL);
-    this.traceableObjectJSON = JSON.parse(
-      readFileSync(process.env.TRACEABLE_OBJECT_JSON_PATH).toString(),
-    );
     this.itemJSON = JSON.parse(
       readFileSync(process.env.ITEM_JSON_PATH).toString(),
     );
     this.productJSON = JSON.parse(
       readFileSync(process.env.PRODUCT_JSON_PATH).toString(),
     );
+    this.traceableObjectJSON = JSON.parse(
+      readFileSync(process.env.TRACEABLE_OBJECT_JSON_PATH).toString(),
+    );
   }
 
-  async generateAccount(id: string) {
-    console.log(ethers.Wallet.createRandom(id)._signingKey());
-    const wallet = ethers.Wallet.createRandom(id);
-    const balancer1 = this.etherProvider.getSigner();
-    console.log(`Balancer1 ${await balancer1.getAddress()} has ${await balancer1.getBalance()} ETH`)
-    return wallet.connect(this.etherProvider);
+  async printRevertReason(error) {
+    if (!error.transactionHash) {
+      console.log(error);
+      return error.message;
+    }
+    const tx = await this.etherProvider.getTransaction(error.transactionHash);
+    if (!tx) {
+      console.log('tx not found');
+      return 'tx not found';
+    } else {
+      const code = await this.etherProvider.call(tx, tx.blockNumber);
+      function hex_to_ascii(str1) {
+        const hex = str1.toString();
+        let str = '';
+        for (let n = 0; n < hex.length; n += 2) {
+          str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+        }
+        return str;
+      }
+      function trimZeroBytes(data) {
+        const i = data.indexOf('00');
+        return data.slice(0, i);
+      }
+      const reason = hex_to_ascii(trimZeroBytes(code.substr(138)));
+      console.log('revert reason:', reason);
+      return `${reason}`;
+    }
   }
 
   getSigner(privateKey: string) {
     return new ethers.Wallet(privateKey, this.etherProvider);
   }
 
-  async getItemContractFactory(): Promise<ethers.ContractFactory> {
+  async generateAccount(id: string) {
+    const wallet = ethers.Wallet.createRandom(id);
+    return wallet.connect(this.etherProvider);
+  }
+
+  async getContractFactory(contractJSON): Promise<ethers.ContractFactory> {
     return await new ethers.ContractFactory(
-      this.itemJSON.abi,
-      this.itemJSON.bytecode,
+      contractJSON.abi,
+      contractJSON.bytecode,
     );
   }
 
-  async getProductContractFactory(): Promise<ethers.ContractFactory> {
-    return await new ethers.ContractFactory(
-      this.productJSON.abi,
-      this.productJSON.bytecode,
-    );
-  }
-
-  generateItemData(createItemDto: CreateItemDto, organization: string, sourceList) {
-    console.log({...createItemDto, organization})
-    const itemData = new ItemData({...createItemDto, organization})
-    console.log(itemData)
-    const itemQuantity = new ItemQuantity(createItemDto)
-    console.log(itemQuantity)
-    const itemSourceList: TraceData[] = [];
-    for (let i = 0; i < sourceList.length; i++) {
-      itemSourceList.push(new TraceData(sourceList[i]));
-      console.log(itemSourceList)
-    }
-    console.log(itemSourceList)
-
-    return { itemData, itemQuantity, itemSourceList }
-  }
-
-  async createItem(
-    createItemDto: CreateItemDto,
-    sourceList,
+  async deployItem(
     signer: Wallet,
+    itemData: ItemData,
+    traceDataList: TraceData[],
+    quantity: Quantity,
   ) {
-    const {itemData, itemQuantity, itemSourceList} = this.generateItemData(createItemDto, signer.address, sourceList);
-    const itemFactory = await this.getItemContractFactory();
-    console.log("AAAAAAAAAA")
-    const item = await itemFactory
-      .connect(signer)
-      .deploy(itemData, itemQuantity);
-    console.log('---------------------------------------------')
-    console.log(
-      `Deployed item contract ${item.address}, Organization is ${signer.address}`,
-    );
-    for (let i = 0; i < itemSourceList.length; i++) {
-      const sourceItem = await itemFactory.attach(itemSourceList[i].usedObject);
-      await sourceItem.addDests([item.address], {gasLimit: 3000000});
-      console.log(`Source ${sourceItem.address} add ${item.address} as dest`);
-    }
-    await item.addSources(itemSourceList, {gasLimit: 3000000});
-    console.log(`SourceList ${sourceList.toString()} is added to ${item.address}`);
-    console.log('---------------------------------------------')
+    try {
+      console.log(`======== Begin deploy item ========`);
+      const itemFactory = await this.getContractFactory(this.itemJSON);
+      const item = await itemFactory.connect(signer).deploy(itemData, quantity);
+      const itemName = (await item.itemData()).name;
+      console.log(
+        `Deployed item contract ${itemName} ( ${item.address} ), Organization is ${signer.address}`,
+      );
 
-    return item.address;
+      // Add destination of source item
+      for (let i = 0; i < traceDataList.length; i++) {
+        const itemSource = await itemFactory
+          .connect(signer)
+          .attach(traceDataList[i].usedObject);
+        const itemSourceName = (await itemSource.itemData()).name;
+        const tx = await itemSource.addDests(
+          [
+            {
+              id: traceDataList[0].id,
+              usedObject: item.address,
+              usedNumber: traceDataList[0].usedNumber,
+              isDeleted: false,
+            },
+          ],
+          { gasLimit: 400000 },
+        );
+        await tx.wait(1);
+        console.log(
+          `Source ${itemSourceName} ( ${itemSource.address} ) add ${itemName} as destination.`,
+        );
+      }
+      if (traceDataList.length !== 0) {
+        // Add sources of newly created item
+        const tx = await item.addSources(traceDataList, { gasLimit: 400000 });
+        await tx.wait(1);
+        const traceIDs = traceDataList.map((ele) => {
+          return ele.id;
+        });
+        console.log(`Item ${itemName} add ${traceIDs.toString()} as sources`);
+      }
+      console.log(`======== End deploy item ========`);
+      return item.address;
+    } catch (e) {
+      const msg = await this.printRevertReason(e);
+      throw new Error(msg);
+    }
   }
 
   async modifyItem(
-    createItemDto: CreateItemDto,
     signer: Wallet,
+    oldItemAddress: string,
+    itemData: ItemData,
+    traceDataList: TraceData[],
+    quantity: Quantity,
   ) {
-    // const itemFactory = await this.getItemContractFactory();
-    // const item = await itemFactory
-    //   .attach(itemAddress)
-    //   .connect(signer)
-    //   .modify(itemData, itemQuantity);
-    // console.log(
-    //   `Modified item contract ${item.address}, Organization is ${signer.address}`,
-    // );
+    try {
+      console.log(`======== Begin modify item ========`);
+      // Set all dest to true in sourceList
+      const itemFactory = await this.getContractFactory(this.itemJSON);
+      const oldItem = await itemFactory.connect(signer).attach(oldItemAddress);
+      const oldSourceList = await oldItem.getSourceList();
+      for (let i = 0; i < oldSourceList.length; i++) {
+        const oldItemSource = await itemFactory
+          .connect(signer)
+          .attach(oldSourceList[i].usedObject);
+        const tx = await oldItemSource.delDest(oldItemAddress);
+        console.log(
+          `Source ${oldItemSource.address} is deleted and restore number`,
+        );
+        await tx.wait(1);
+      }
+      // Set all source to true in destinationList
+      const oldDestinationList = await oldItem.getDestinationList();
+      for (let i = 0; i < oldDestinationList.length; i++) {
+        const oldItemDestination = await itemFactory
+          .connect(signer)
+          .attach(oldDestinationList[i].usedObject);
+        const tx = await oldItemDestination.delSource(oldItemAddress);
+        await tx.wait(1);
+      }
+      // destruct item
+      const tx = await oldItem.destruct(signer.address);
+      await tx.wait(1);
+      // deploy new Item
+      const itemAddress = this.deployItem(
+        signer,
+        itemData,
+        traceDataList,
+        quantity,
+      );
+      console.log(`======== End modify item ========`);
+      return itemAddress;
+    } catch (e) {
+      const msg = await this.printRevertReason(e);
+      throw new Error(msg);
+    }
   }
 
-  async createProcedure() {}
+  async addProcedure(proicedureDto: ProcedureDto, signer: Wallet) {}
 
-  async modifyProcedure() {}
+  async deployProduct() {}
 
-  async createTransaction() {}
-
-  async modifyTransaction() {}
+  async modifyProduct() {}
 }
