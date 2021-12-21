@@ -12,7 +12,7 @@ paths:
     post:
       tags:
       - "pltt"
-      summary: Create Item
+      summary: Create Item job for deploying contract
       requestBody:
         required: true
         content:
@@ -32,14 +32,14 @@ paths:
                   $ref: '#/definitions/sourceList'
                 producedNumber:
                   $ref: '#/definitions/producedNumber'
-                restNumber:
-                  $ref: '#/definitions/restNumber2'
-                packNumber:
-                  $ref: '#/definitions/packNumber'
                 producedDate:
                   $ref: '#/definitions/producedDate'
                 expirationDate:
                   $ref: '#/definitions/expirationDate'
+                packNumber:
+                  $ref: '#/definitions/packNumber'
+                unit:
+                  $ref: '#/definitions/unit'
       responses:
         "201":
           description: Successfully Call
@@ -49,25 +49,8 @@ paths:
                 type: object
                 propertires:
                 example:
-                  msg: "Success"
-        "400":
-          description: User Body Error
-          content:
-            application/json:
-              schema:
-                type: object
-                propertires:
-                example:
-                  msg: "Missing SHID o PHID"
-        "500":
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                propertires:
-                example:
-                  msg: "Internal Server Error"
+                  jobID: 1
+                  status: "active"
     put:
       tags:
       - "pltt"
@@ -91,14 +74,16 @@ paths:
                   $ref: '#/definitions/sourceList'
                 producedNumber:
                   $ref: '#/definitions/producedNumber'
-                restNumber:
-                  $ref: '#/definitions/restNumber2'
-                packNumber:
-                  $ref: '#/definitions/packNumber'
                 producedDate:
                   $ref: '#/definitions/producedDate'
                 expirationDate:
                   $ref: '#/definitions/expirationDate'
+                restNumber:
+                  $ref: '#/definitions/restNumber'
+                packNumber:
+                  $ref: '#/definitions/packNumber'
+                unit:
+                  $ref: '#/definitions/unit'
       responses:
         "201":
           description: Successfully Call
@@ -108,25 +93,8 @@ paths:
                 type: object
                 propertires:
                 example:
-                  msg: "Success"
-        "400":
-          description: User Body Error
-          content:
-            application/json:
-              schema:
-                type: object
-                propertires:
-                example:
-                  msg: "Missing SHID or PHID"
-        "500":
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                propertires:
-                example:
-                  msg: "Internal Server Error"
+                  jobID: 1
+                  status: "active"
   /procedure:
     post:
       tags:
@@ -162,79 +130,9 @@ paths:
                 type: object
                 propertires:
                 example:
-                  msg: "Success"
-        "400":
-          description: User Body Error
-          content:
-            application/json:
-              schema:
-                type: object
-                propertires:
-                example:
-                  msg: "Missing SHID o PHID"
-        "500":
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                propertires:
-                example:
-                  msg: "Internal Server Error"
-    put:
-      tags:
-      - "pltt"
-      summary: Update Object
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                shid:
-                  $ref: '#/definitions/shid'
-                procedureID:
-                  $ref: '#/definitions/procedureID'
-                procedureName:
-                  $ref: '#/definitions/procedureName'
-                startTime:
-                  $ref: '#/definitions/startTime'
-                endTime:
-                  $ref: '#/definitions/endTime'
-                mediaList:
-                  $ref: '#/definitions/mediaList'
-                sensorDataURLs:
-                  $ref: '#/definitions/sensorDataURLs'
-      responses:
-        "201":
-          description: Successfully Call
-          content:
-            application/json:
-              schema:
-                type: object
-                propertires:
-                example:
-                  msg: "Success"
-        "400":
-          description: User Body Error
-          content:
-            application/json:
-              schema:
-                type: object
-                propertires:
-                example:
-                  msg: "Missing SHID or PHID"
-        "500":
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                propertires:
-                example:
-                  msg: "Internal Server Error"
-  /transaction:
+                  jobID: 1
+                  status: "active"
+  /product:
     post:
       tags:
       - "pltt"
@@ -353,15 +251,15 @@ definitions:
   shid:
     name: shid
     description: Single History ID
-    example: "133450"
+    example: 133450
   phid:
     name: phid
     description: Product History ID
-    example: "47246"
+    example: 47246
   organizationID: 
     name: organizationID
     description: Orgnization ID
-    example: "1234"
+    example: 1234
   organizationName: 
     name: organizationName
     description: Orgnization Name
@@ -369,11 +267,11 @@ definitions:
   procedureID:
     name: procedureID
     description: Procedure ID
-    example: "2345"
+    example: 2345
   ownerID:
     name: ownerID
     description: Procedure ID
-    example: "23456"
+    example: 23456
   ownerName: 
     name: ownerName
     description: Owner Name
@@ -395,20 +293,22 @@ definitions:
           $ref: '#/definitions/phid'
         number:
           type: string
-          example: "1122"
-    example: [{"shid": "12343", "phid": "12345", "number": "200 G"}, {"shid": "5555", "phid": "12234", "number": "500 ML"}]
+          example: 1122
+    example: [{"shid": 1234, "phid": 12345, "number": 200}, {"shid": 5555, "phid": 12234, "number": 500}]
   producedNumber: 
-    example: 15000 ML
+    example: 15000
   packNumber: 
-    example: "15"
+    example: 15
   soldNumber: 
-    example: 5000 ML
+    example: 5000
   soldPack: 
-    example: "5"
+    example: 5
   restNumber:
-    example:  10000 ML
+    example:  10000
   restNumber2:
-    example:  15000 ML
+    example:  15000
+  unit:
+    example: "ML"
   producedDate:
     example: "2020-11-01 16:43:04"
   expirationDate:
