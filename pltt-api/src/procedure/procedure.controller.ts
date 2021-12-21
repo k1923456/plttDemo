@@ -34,6 +34,10 @@ export class ProcedureController {
         HttpStatus.NOT_FOUND,
       );
     }
+    const item = await this.itemService.findOneItem(job.data.procedureDto.shid);
+    if (item === null) {
+      throw new HttpException(`Item has not been created`, HttpStatus.CONFLICT);
+    }
     const status = await job.getState();
     let failedReason = '';
     if (status === 'failed') {
@@ -43,6 +47,7 @@ export class ProcedureController {
     return {
       jobID: params.jobID,
       status,
+      address: item.address,
       failedReason,
     };
   }
