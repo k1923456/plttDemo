@@ -8,7 +8,31 @@ tags:
 - name: "pltt"
   description: "PLTT API list"
 paths:
-  /item:
+  /item/{jobID}:
+    get:
+      tags:
+      - "pltt"
+      summary: Get item using job ID
+      parameters:
+        - in: path
+          name: jobID
+          schema:
+            type: integer
+          required: true
+          description: Job ID
+      responses:
+        "201":
+          description: Successfully Call
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  jobID: 1
+                  status: "completed"
+                  address: "0xA92F67fB7Bdd8C3727333ce43b4c630d200ce424"
+                  failReason: ""
     post:
       tags:
       - "pltt"
