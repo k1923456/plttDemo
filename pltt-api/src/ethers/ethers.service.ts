@@ -1,17 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ethers, Wallet } from 'ethers';
 import { readFileSync } from 'fs';
-import { ItemDto } from '../item/dto/item.dto';
-import { ProcedureDto } from '../procedure/dto/procedure.dto';
-import { ProductDto } from '../product/dto/product.dto';
 import { ItemData } from './schemas/item.schema';
 import { ProcedureData } from './schemas/procedure.schema';
-import { ProductData } from './schemas/product.schema';
+// import { ProductData } from './schemas/product.schema';
 import { TraceData } from './schemas/traceData.schema';
 import { Quantity } from './schemas/quantity.schema';
-import { ItemService } from '../item/item.service';
-import { ProductService } from '../product/product.service';
-import e from 'express';
 
 @Injectable()
 export class EthersService {
@@ -110,19 +104,23 @@ export class EthersService {
           ],
           { gasLimit: 400000 },
         );
-        await tx.wait(1);
+        const receipt = await tx.wait(1);
         console.log(
-          `Source ${itemSourceName} ( ${itemSource.address} ) add ${itemName} as destination.`,
+          `Source ${itemSourceName} ( ${itemSource.address} ) add ${itemName} as destination. (tx: ${receipt.transactionHash})`,
         );
       }
       if (traceDataList.length !== 0) {
         // Add sources of newly created item
         const tx = await item.addSources(traceDataList, { gasLimit: 400000 });
-        await tx.wait(1);
+        const receipt = await tx.wait(1);
         const traceIDs = traceDataList.map((ele) => {
           return ele.id;
         });
-        console.log(`Item ${itemName} add ${traceIDs.toString()} as sources`);
+        console.log(
+          `Item ${itemName} add ${traceIDs.toString()} as sources. (tx: ${
+            receipt.transactionHash
+          })`,
+        );
       }
       console.log(`======== End deploy item ========`);
       return item.address;
@@ -150,10 +148,10 @@ export class EthersService {
           .connect(signer)
           .attach(oldSourceList[i].usedObject);
         const tx = await oldItemSource.delDest(oldItemAddress);
+        const receipt = await tx.wait(1);
         console.log(
-          `Source ${oldItemSource.address} is deleted and restore number`,
+          `Source ${oldItemSource.address} is deleted and restore number. (tx: ${receipt.transactionHash})`,
         );
-        await tx.wait(1);
       }
       // Set all source to true in destinationList
       const oldDestinationList = await oldItem.getDestinationList();
@@ -162,13 +160,19 @@ export class EthersService {
           .connect(signer)
           .attach(oldDestinationList[i].usedObject);
         const tx = await oldItemDestination.delSource(oldItemAddress);
-        await tx.wait(1);
+        const receipt = await tx.wait(1);
+        console.log(
+          `Item ${oldItemDestination.address} delete source ${oldItemAddress}. (tx: ${receipt.transactionHash})`,
+        );
       }
       // destruct item
       const tx = await oldItem.destruct(signer.address);
-      await tx.wait(1);
+      const receipt = await tx.wait(1);
+      console.log(
+        `Item ${oldItemAddress} has been destructed. (tx: ${receipt.transactionHash})`,
+      );
       // deploy new Item
-      const itemAddress = this.deployItem(
+      const itemAddress = await this.deployItem(
         signer,
         itemData,
         traceDataList,
@@ -182,9 +186,23 @@ export class EthersService {
     }
   }
 
-  async addProcedure(proicedureDto: ProcedureDto, signer: Wallet) {}
+  async addProcedure(
+    signer: Wallet,
+    itemAddress: string,
+    procedureData: ProcedureData,
+  ) {
+    const itemFactory = await this.getContractFactory(this.itemJSON);
+    const item = await itemFactory.connect(signer).attach(itemAddress);
 
-  async deployProduct() {}
+    const tx = await item.addProcedure(procedureData);
+    const receipt = await tx.wait(1);
 
-  async modifyProduct() {}
+    console.log(
+      `Procedure ${procedureData.procedure} is added to item ${itemAddress}. (tx: ${receipt.transactionHash})`,
+    );
+  }
+
+  // async deployProduct() {}
+
+  // async modifyProduct() {}
 }

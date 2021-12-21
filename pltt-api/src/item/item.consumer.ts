@@ -5,8 +5,6 @@ import { ItemDto, Source } from './dto/item.dto';
 import { ItemService } from './item.service';
 import { ProductService } from '../product/product.service';
 import { ItemData } from '../ethers/schemas/item.schema';
-import { ProcedureData } from '../ethers/schemas/procedure.schema';
-import { ProductData } from '../ethers/schemas/product.schema';
 import { TraceData } from '../ethers/schemas/traceData.schema';
 import { Quantity } from '../ethers/schemas/quantity.schema';
 
@@ -36,8 +34,8 @@ export class ItemConsumer {
     }
   }
 
-  generateItemData(createItemDto: ItemDto, organization: string) {
-    return new ItemData({ ...createItemDto, organization });
+  generateItemData(itemDto: ItemDto, organization: string) {
+    return new ItemData({ ...itemDto, organization });
   }
 
   generateTraceableObjectData(dto: ItemDto, sourceList) {

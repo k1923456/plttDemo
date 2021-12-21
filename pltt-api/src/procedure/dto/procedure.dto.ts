@@ -1,5 +1,3 @@
-import { BigNumber } from 'ethers';
-
 export class ProcedureDto {
   shid: number;
   procedureID: number;
@@ -8,12 +6,4 @@ export class ProcedureDto {
   endTime: string;
   mediaList: string[];
   sensorDataURLs: string[];
-}
-
-export class ProcedureMetadata {
-  name: string;
-  mediaList: string[];
-  sensorList: string[];
-  startTime: BigNumber;
-  endTime: BigNumber;
 }

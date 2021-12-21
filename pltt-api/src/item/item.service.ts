@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import {
   OrganizationEntity,
@@ -7,7 +8,6 @@ import {
 } from '../schemas/organization.schema';
 import { ItemEntity, Item, ItemDocument } from '../schemas/item.schema';
 import { ItemDto } from './dto/item.dto';
-import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class ItemService {

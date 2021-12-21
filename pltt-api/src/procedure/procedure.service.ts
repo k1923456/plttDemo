@@ -1,25 +1,36 @@
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
+import {
+  ProcedureEntity,
+  Procedure,
+  ProcedureDocument,
+} from '../schemas/procedure.schema';
 import { ProcedureDto } from './dto/procedure.dto';
 
 @Injectable()
 export class ProcedureService {
-  create(procedureDto: ProcedureDto) {
-    return 'This action adds a new procedure';
+  constructor(
+    @InjectModel(Procedure.name)
+    private procedureModel: Model<ProcedureDocument>,
+  ) {}
+
+  async createProcedure(procedureDto: ProcedureDto, privateKey: string) {
+    await this.procedureModel
+      .findOneAndUpdate(
+        {
+          procedureID: procedureDto.procedureID,
+        },
+        new ProcedureEntity({
+          procedureID: procedureDto.procedureID,
+          privateKey: privateKey,
+        }),
+        { upsert: true },
+      )
+      .exec();
   }
 
-  findAll() {
-    return `This action returns all procedure`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} procedure`;
-  }
-
-  update(id: number, procedureDto: ProcedureDto) {
-    return `This action updates a #${id} procedure`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} procedure`;
+  async findOneProcedure(shid: number) {
+    return await this.procedureModel.findOne({ shid }).exec();
   }
 }

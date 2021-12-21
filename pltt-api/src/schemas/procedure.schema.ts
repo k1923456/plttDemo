@@ -4,21 +4,13 @@ import { BigNumber } from '@ethersproject/bignumber';
 
 export type ProcedureDocument = Procedure & Document;
 
-export class ProcedureDataEntity {
-  procedure: string;
-  name: string;
-  mediaList: string[];
-  sensorList: string[];
-  startTime: BigNumber;
-  endTime: BigNumber;
+export class ProcedureEntity {
+  procedureID: number;
+  privateKey: string;
 
   constructor(object) {
-    this.procedure = object.procedure;
-    this.name = object.name;
-    this.mediaList = object.mediaList;
-    this.sensorList = object.sensorList;
-    this.startTime = BigNumber.from(Date.parse(object.startTime) / 1000);
-    this.endTime = BigNumber.from(Date.parse(object.endTime) / 1000);
+    this.procedureID = object.procedureID;
+    this.privateKey = object.privateKey;
   }
 }
 

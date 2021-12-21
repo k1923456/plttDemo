@@ -4,15 +4,15 @@ export class ProcedureData {
   procedure: string;
   name: string;
   mediaList: string[];
-  sensorList: string[];
+  sensorDataURLs: string[];
   startTime: BigNumber;
   endTime: BigNumber;
 
   constructor(object) {
     this.procedure = object.procedure;
-    this.name = object.name;
+    this.name = object.procedureName;
     this.mediaList = object.mediaList;
-    this.sensorList = object.sensorList;
+    this.sensorDataURLs = object.sensorDataURLs;
     this.startTime = BigNumber.from(Date.parse(object.startTime) / 1000);
     this.endTime = BigNumber.from(Date.parse(object.startTime) / 1000);
   }
@@ -22,7 +22,7 @@ export class ProcedureData {
       procedure: this.procedure,
       name: this.name,
       mediaList: this.mediaList,
-      sensorList: this.sensorList,
+      sensorDataURLs: this.sensorDataURLs,
       startTime: this.startTime,
       endTime: this.endTime,
     };
