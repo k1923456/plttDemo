@@ -82,8 +82,6 @@ export class EthersService {
     let sourceName;
     if (!traceData.shid.isZero()) {
       source = await itemFactory.connect(signer).attach(traceData.usedObject);
-      console.log(await source.itemData());
-      console.log(signer.address);
       sourceName = (await source.itemData()).name;
     } else {
       source = await productFactory
@@ -141,7 +139,7 @@ export class EthersService {
         const tx = await item.addSources(traceDataList, { gasLimit: 400000 });
         const receipt = await tx.wait(1);
         const traceIDs = traceDataList.map((ele) => {
-          return ele.shid.isZero ? ele.phid : ele.shid;
+          return ele.shid.isZero() ? ele.phid : ele.shid;
         });
         console.log(
           `Item ${itemName} add ${traceIDs.toString()} as sources. (tx: ${
@@ -238,7 +236,6 @@ export class EthersService {
     const itemFactory = await this.getContractFactory(this.itemJSON);
     const item = await itemFactory.connect(signer).attach(itemAddress);
 
-    console.log(procedureData);
     const tx = await item.addProcedure(procedureData);
     const receipt = await tx.wait(1);
 
@@ -333,7 +330,6 @@ export class EthersService {
         .attach(oldProductAddress);
       const oldSourceList = await oldProduct.getSourceList();
       for (let i = 0; i < oldSourceList.length; i++) {
-        console.log(traceDataList[i]);
         const { source, sourceName } = await this.connectSource(
           signer,
           traceDataList[i],
