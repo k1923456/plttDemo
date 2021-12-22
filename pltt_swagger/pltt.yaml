@@ -33,6 +33,7 @@ paths:
                   status: "completed"
                   address: "0xA92F67fB7Bdd8C3727333ce43b4c630d200ce424"
                   failReason: ""
+  /item:
     post:
       tags:
       - "pltt"
@@ -180,6 +181,31 @@ paths:
                 example:
                   jobID: 1
                   status: "active"
+  /product/{jobID}:
+    get:
+      tags:
+      - "pltt"
+      summary: Get product using job ID
+      parameters:
+        - in: path
+          name: jobID
+          schema:
+            type: integer
+          required: true
+          description: Job ID
+      responses:
+        "201":
+          description: Successfully Call
+          content:
+            application/json:
+              schema:
+                type: object
+                propertires:
+                example:
+                  jobID: 1
+                  status: "completed"
+                  address: "0xA92F67fB7Bdd8C3727333ce43b4c630d200ce424"
+                  failReason: ""
   /product:
     post:
       tags:
@@ -192,8 +218,6 @@ paths:
             schema:
               type: object
               properties:
-                shid:
-                  $ref: '#/definitions/shid'
                 phid:
                   $ref: '#/definitions/phid'
                 organizationID:
@@ -204,12 +228,21 @@ paths:
                   $ref: '#/definitions/ownerID'
                 ownerName:
                   $ref: '#/definitions/ownerName'
-                soldNumber:
-                  $ref: '#/definitions/soldNumber'
-                soldPack:
-                  $ref: '#/definitions/soldPack'
+                title:
+                  $ref: '#/definitions/title'
+                sourceList:
+                  $ref: '#/definitions/sourceList'
+                producedNumber:
+                  $ref: '#/definitions/producedNumber'
                 transactionDate:
                   $ref: '#/definitions/transactionDate'
+                expirationDate:
+                  $ref: '#/definitions/expirationDate'
+                packNumber:
+                  $ref: '#/definitions/packNumber'
+                unit:
+                  $ref: '#/definitions/unit'
+
       responses:
         "201":
           description: Successfully Call
@@ -249,8 +282,6 @@ paths:
             schema:
               type: object
               properties:
-                shid:
-                  $ref: '#/definitions/shid'
                 phid:
                   $ref: '#/definitions/phid'
                 organizationID:
@@ -261,12 +292,20 @@ paths:
                   $ref: '#/definitions/ownerID'
                 ownerName:
                   $ref: '#/definitions/ownerName'
-                soldNumber:
-                  $ref: '#/definitions/soldNumber'
-                soldPack:
-                  $ref: '#/definitions/soldPack'
+                title:
+                  $ref: '#/definitions/title'
+                sourceList:
+                  $ref: '#/definitions/sourceList'
+                producedNumber:
+                  $ref: '#/definitions/producedNumber'
                 transactionDate:
                   $ref: '#/definitions/transactionDate'
+                expirationDate:
+                  $ref: '#/definitions/expirationDate'
+                packNumber:
+                  $ref: '#/definitions/packNumber'
+                unit:
+                  $ref: '#/definitions/unit'
       responses:
         "201":
           description: Successfully Call
