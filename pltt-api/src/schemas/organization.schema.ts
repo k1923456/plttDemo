@@ -5,10 +5,12 @@ export type OrganizationDocument = Organization & Document;
 
 export class OrganizationEntity {
   organizationID: number;
+  organizationName: string;
   privateKey: string;
 
   constructor(object) {
     this.organizationID = object.organizationID;
+    this.organizationName = object.organizationName;
     this.privateKey = object.privateKey;
   }
 }
@@ -20,6 +22,9 @@ export class Organization {
 
   @Prop()
   organizationID: number;
+
+  @Prop()
+  organizationName: string;
 
   @Prop()
   privateKey: string;

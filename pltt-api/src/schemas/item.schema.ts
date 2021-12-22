@@ -3,10 +3,12 @@ import { Document } from 'mongoose';
 
 export class ItemEntity {
   shid: number;
+  title: string;
   address: string;
 
   constructor(object) {
     this.shid = object.shid;
+    this.title = object.title;
     this.address = object.address;
   }
 }
@@ -20,6 +22,9 @@ export class Item {
 
   @Prop()
   shid: number;
+
+  @Prop()
+  title: string;
 
   @Prop()
   address: string;

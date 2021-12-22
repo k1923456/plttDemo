@@ -23,6 +23,7 @@ export class ProcedureService {
         },
         new ProcedureEntity({
           procedureID: procedureDto.procedureID,
+          procedureName: procedureDto.procedureName,
           privateKey: privateKey,
         }),
         { upsert: true },

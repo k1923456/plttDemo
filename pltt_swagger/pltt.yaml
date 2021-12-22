@@ -339,7 +339,7 @@ definitions:
           $ref: '#/definitions/shid'
         phid:
           $ref: '#/definitions/phid'
-        number:
+        usedNumber:
           type: string
           example: 1122
     example: [{"shid": 1234, "phid": 12345, "number": 200}, {"shid": 5555, "phid": 12234, "number": 500}]

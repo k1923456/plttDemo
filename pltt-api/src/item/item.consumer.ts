@@ -52,23 +52,25 @@ export class ItemConsumer {
     const sourceData = await this.itemService.findOneItem(source.shid);
     if (sourceData !== null) {
       return {
-        id: source.shid,
+        shid: source.shid,
         usedObject: sourceData.address,
         usedNumber: source.usedNumber,
         isDeleted: false,
+        name: sourceData.title
       };
     }
     return null;
   }
 
   async getProduct(source: Source) {
-    const productData = await this.productService.findOneProduct(source.phid);
-    if (productData !== null) {
+    const sourceData = await this.productService.findOneProduct(source.phid);
+    if (sourceData !== null) {
       return {
-        id: source.phid,
-        usedObject: productData.address,
+        phid: source.phid,
+        usedObject: sourceData.address,
         usedNumber: source.usedNumber,
         isDeleted: false,
+        name: sourceData.title
       };
     }
     return null;
@@ -78,9 +80,19 @@ export class ItemConsumer {
     const sourceList = [];
     for (let i = 0; i < itemDto.sourceList.length; i++) {
       if (itemDto.sourceList[i].shid !== undefined) {
-        sourceList.push(await this.getItem(itemDto.sourceList[i]));
+        const source = await this.getItem(itemDto.sourceList[i]);
+        if (source !== null) {
+          sourceList.push(await this.getItem(itemDto.sourceList[i]));
+        } else {
+          throw new Error(`Source ${itemDto.sourceList[i].shid} is not created`)
+        }
       } else {
-        sourceList.push(await this.getProduct(itemDto.sourceList[i]));
+        const source = await this.getProduct(itemDto.sourceList[i]);
+        if (source !== null) {
+          sourceList.push(await this.getProduct(itemDto.sourceList[i]));
+        } else {
+          throw new Error(`Source ${itemDto.sourceList[i].phid} is not created`)
+        }
       }
     }
     return sourceList;
@@ -96,6 +108,7 @@ export class ItemConsumer {
       job.data.itemDto,
       sourceList,
     );
+
     const itemAddress = await this.ethersService.deployItem(
       wallet,
       itemData,
