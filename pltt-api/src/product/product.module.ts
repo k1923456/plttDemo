@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
-import { ProductService } from './product.service';
-import { ProductController } from './product.controller';
+import { BullModule } from '@nestjs/bull';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   Organization,
   OrganizationSchema,
 } from '../schemas/organization.schema';
+import { Item, ItemSchema } from '../schemas/item.schema';
 import { Product, ProductSchema } from '../schemas/product.schema';
 import { ItemService } from '../item/item.service';
-import { Item, ItemSchema } from '../schemas/item.schema';
-import { BullModule } from '@nestjs/bull';
+import { ProductService } from './product.service';
+import { ProductController } from './product.controller';
+import { ProductConsumer } from './product.consumer';
 
 @Module({
   imports: [
@@ -19,10 +20,10 @@ import { BullModule } from '@nestjs/bull';
       { name: Product.name, schema: ProductSchema },
     ]),
     BullModule.registerQueue({
-      name: 'itemContract',
+      name: 'product',
     }),
   ],
   controllers: [ProductController],
-  providers: [ProductService, ItemService],
+  providers: [ProductService, ItemService, ProductConsumer],
 })
 export class ProductModule {}

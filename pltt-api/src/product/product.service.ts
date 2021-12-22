@@ -1,5 +1,6 @@
 import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import {
   OrganizationEntity,
   Organization,
@@ -10,7 +11,7 @@ import {
   Product,
   ProductDocument,
 } from '../schemas/product.schema';
-import { InjectModel } from '@nestjs/mongoose';
+import { ProductDto } from './dto/product.dto';
 
 @Injectable()
 export class ProductService {
@@ -20,25 +21,45 @@ export class ProductService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
   ) {}
 
-  async createProduct(productEntity: ProductEntity, itemAddress: string) {
+  async createProduct(productDto: ProductDto, productAddress: string) {
     await this.productModel
       .findOneAndUpdate(
         {
-          phid: productEntity.phid,
+          phid: productDto.phid,
         },
-        productEntity,
+        new ProductEntity({ shid: productDto.phid, title: productDto.title, address: productAddress }),
         { upsert: true },
       )
       .exec();
   }
 
-  async createOrganization(organizationEntity: OrganizationEntity) {
+  async createOrganization(productDto: ProductDto, privateKey: string) {
     await this.organizationModel
       .findOneAndUpdate(
         {
-          organizationID: organizationEntity.organizationID,
+          organizationID: productDto.organizationID,
         },
-        organizationEntity,
+        new OrganizationEntity({
+          organizationID: productDto.organizationID,
+          organizationName: productDto.organizationName,
+          privateKey,
+        }),
+        { upsert: true },
+      )
+      .exec();
+  }
+
+  async createOrganizationForOwner(productDto: ProductDto, privateKey: string) {
+    await this.organizationModel
+      .findOneAndUpdate(
+        {
+          organizationID: productDto.ownerID,
+        },
+        new OrganizationEntity({
+          organizationID: productDto.ownerID,
+          organizationName: productDto.organizationName,
+          privateKey,
+        }),
         { upsert: true },
       )
       .exec();

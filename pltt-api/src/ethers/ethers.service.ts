@@ -72,6 +72,25 @@ export class EthersService {
     );
   }
 
+  async connectSource(signer, traceData: TraceData, itemFactory, productFactory) {
+    let source;
+        let sourceName;
+        if (!traceData.shid.isZero()) {
+          source = await itemFactory
+          .connect(signer)
+          .attach(traceData.usedObject);
+          console.log((await source.itemData()))
+          console.log(signer.address)
+          sourceName = (await source.itemData()).name;
+        } else {
+          source = await productFactory
+          .connect(signer)
+          .attach(traceData.usedObject);
+          sourceName = (await source.productData()).name;
+        }
+        return { source, sourceName }
+  }
+
   async deployItem(
     signer: Wallet,
     itemData: ItemData,
@@ -82,27 +101,15 @@ export class EthersService {
       console.log(`======== Begin deploy item ========`);
       const itemFactory = await this.getContractFactory(this.itemJSON);
       const productFactory = await this.getContractFactory(this.productJSON);
-      console.log("AAA")
       const item = await itemFactory.connect(signer).deploy(itemData, quantity);
-      console.log("AAA")
       const itemName = (await item.itemData()).name;
       console.log(
         `Deployed item contract ${itemName} ( ${item.address} ), Organization is ${signer.address}`,
       );
 
-      // Add destination of source item
+      // Add destination of source
       for (let i = 0; i < traceDataList.length; i++) {
-        let source;
-        if (!traceDataList[i].shid.isZero()) {
-          source = await itemFactory
-          .connect(signer)
-          .attach(traceDataList[i].usedObject);
-        } else {
-          source = await productFactory
-          .connect(signer)
-          .attach(traceDataList[i].usedObject);
-        }
-        const itemSourceName = (await source.itemData()).name;
+        const { source, sourceName } = await this.connectSource(signer, traceDataList[i], itemFactory, productFactory);
         const tx = await source.addDests(
           [
             {
@@ -118,7 +125,7 @@ export class EthersService {
         );
         const receipt = await tx.wait(1);
         console.log(
-          `Source ${itemSourceName} ( ${source.address} ) add ${itemName} as destination. (tx: ${receipt.transactionHash})`,
+          `Source ${sourceName} ( ${source.address} ) add ${itemName} as destination. (tx: ${receipt.transactionHash})`,
         );
       }
       if (traceDataList.length !== 0) {
@@ -156,29 +163,17 @@ export class EthersService {
       const productFactory = await this.getContractFactory(this.productJSON);
       const oldItem = await itemFactory.connect(signer).attach(oldItemAddress);
       const oldSourceList = await oldItem.getSourceList();
-      console.log(oldSourceList)
       for (let i = 0; i < oldSourceList.length; i++) {
-        let source;
-        if (!oldSourceList[i].shid.isZero()) {
-          source = await itemFactory
-          .connect(signer)
-          .attach(oldSourceList[i].usedObject);
-        } else {
-          source = await productFactory
-          .connect(signer)
-          .attach(oldSourceList[i].usedObject);
-        }
+        const { source, sourceName } = await this.connectSource(signer, traceDataList[i], itemFactory, productFactory);
         const tx = await source.delDest(oldItemAddress);
         const receipt = await tx.wait(1);
         console.log(
-          `Source ${source.address} is deleted and restore number. (tx: ${receipt.transactionHash})`,
+          `Source ${sourceName} (address: ${source.address}) is deleted and restore number. (tx: ${receipt.transactionHash})`,
         );
       }
       // Set all source to true in destinationList
       const oldDestinationList = await oldItem.getDestinationList();
-      console.log(oldDestinationList)
       for (let i = 0; i < oldDestinationList.length; i++) {
-        console.log(oldDestinationList[i])
         let dest;
         if (!oldDestinationList[i].shid.isZero()) {
           dest = await itemFactory
@@ -240,63 +235,57 @@ export class EthersService {
     traceDataList: TraceData[],
     quantity: Quantity,
   ) {
-    // try {
-    //   console.log(`======== Begin deploy product ========`);
-    //   console.log("RRRR")
-    //   const productFactory = await this.getContractFactory(this.productJSON);
-    //   console.log("RRRR")
-    //   console.log(productData)
-    //   const product = await productFactory.connect(signer).deploy(productData, quantity);
-    //   console.log("RRRR")
-    //   const productName = (await product.productData()).name;
-    //   console.log("RRRR")
-    //   console.log(
-    //     `Deployed product contract ${productName} ( ${product.address} ), Organization is ${signer.address}`,
-    //   );
+    try {
+      console.log(`======== Begin deploy product ========`);
+      const itemFactory = await this.getContractFactory(this.itemJSON);
+      const productFactory = await this.getContractFactory(this.productJSON);
+      const product = await productFactory.connect(signer).deploy(productData, quantity);
+      const productName = (await product.productData()).name;
+      console.log(
+        `Deployed product contract ${productName} ( ${product.address} ), Organization is ${signer.address}`,
+      );
 
-    //   // Add destination of source product
-    //   for (let i = 0; i < traceDataList.length; i++) {
-    //     console.log("ADASDASD")
-    //     const productSource = await productFactory
-    //       .connect(signer)
-    //       .attach(traceDataList[i].usedObject);
-    //     const productSourceName = (await productSource.productData()).name;
-    //     console.log(productSourceName)
-    //     const tx = await productSource.addDests(
-    //       [
-    //         {
-    //           id: traceDataList[0].id,
-    //           usedObject: product.address,
-    //           usedNumber: traceDataList[0].usedNumber,
-    //           isDeleted: false,
-    //         },
-    //       ],
-    //       { gasLimit: 400000 },
-    //     );
-    //     const receipt = await tx.wait(1);
-    //     console.log(
-    //       `Source ${productSourceName} ( ${productSource.address} ) add ${productName} as destination. (tx: ${receipt.transactionHash})`,
-    //     );
-    //   }
-    //   if (traceDataList.length !== 0) {
-    //     // Add sources of newly created product
-    //     const tx = await product.addSources(traceDataList, { gasLimit: 400000 });
-    //     const receipt = await tx.wait(1);
-    //     const traceIDs = traceDataList.map((ele) => {
-    //       return ele.id;
-    //     });
-    //     console.log(
-    //       `Product ${productName} add ${traceIDs.toString()} as sources. (tx: ${
-    //         receipt.transactionHash
-    //       })`,
-    //     );
-    //   }
-    //   console.log(`======== End deploy product ========`);
-    //   return product.address;
-    // } catch (e) {
-    //   const msg = await this.printRevertReason(e);
-    //   throw new Error(msg);
-    // }
+      // Add destination of source
+      for (let i = 0; i < traceDataList.length; i++) {
+        console.log(traceDataList[i])
+        const { source, sourceName } = await this.connectSource(signer, traceDataList[i], itemFactory, productFactory);
+        const tx = await source.addDests(
+          [
+            {
+              shid: traceDataList[0].shid,
+              phid: traceDataList[0].phid,
+              usedObject: product.address,
+              usedNumber: traceDataList[0].usedNumber,
+              isDeleted: traceDataList[0].isDeleted,
+              name: traceDataList[0].name,
+            },
+          ],
+          { gasLimit: 400000 },
+        );
+        const receipt = await tx.wait(1);
+        console.log(
+          `Source ${sourceName} ( ${source.address} ) add ${productName} as destination. (tx: ${receipt.transactionHash})`,
+        );
+      }
+      if (traceDataList.length !== 0) {
+        // Add sources of newly created product
+        const tx = await product.addSources(traceDataList, { gasLimit: 400000 });
+        const receipt = await tx.wait(1);
+        const traceIDs = traceDataList.map((ele) => {
+          return ele.shid.isZero ? ele.phid : ele.shid;
+        });
+        console.log(
+          `Product ${productName} add ${traceIDs.toString()} as sources. (tx: ${
+            receipt.transactionHash
+          })`,
+        );
+      }
+      console.log(`======== End deploy product ========`);
+      return product.address;
+    } catch (e) {
+      const msg = await this.printRevertReason(e);
+      throw new Error(msg);
+    }
   }
 
   async modifyProduct(
@@ -306,52 +295,59 @@ export class EthersService {
     traceDataList: TraceData[],
     quantity: Quantity,
   ) {
-    // try {
-    //   console.log(`======== Begin modify product ========`);
-    //   // Set all dest to true in sourceList
-    //   const productFactory = await this.getContractFactory(this.productJSON);
-    //   const oldProduct = await productFactory.connect(signer).attach(oldProductAddress);
-    //   const oldSourceList = await oldProduct.getSourceList();
-    //   for (let i = 0; i < oldSourceList.length; i++) {
-    //     const oldProductSource = await productFactory
-    //       .connect(signer)
-    //       .attach(oldSourceList[i].usedObject);
-    //     const tx = await oldProductSource.delDest(oldProductAddress);
-    //     const receipt = await tx.wait(1);
-    //     console.log(
-    //       `Source ${oldProductSource.address} is deleted and restore number. (tx: ${receipt.transactionHash})`,
-    //     );
-    //   }
-    //   // Set all source to true in destinationList
-    //   const oldDestinationList = await oldProduct.getDestinationList();
-    //   for (let i = 0; i < oldDestinationList.length; i++) {
-    //     const oldProductDestination = await productFactory
-    //       .connect(signer)
-    //       .attach(oldDestinationList[i].usedObject);
-    //     const tx = await oldProductDestination.delSource(oldProductAddress);
-    //     const receipt = await tx.wait(1);
-    //     console.log(
-    //       `Product ${oldProductDestination.address} delete source ${oldProductAddress}. (tx: ${receipt.transactionHash})`,
-    //     );
-    //   }
-    //   // destruct product
-    //   const tx = await oldProduct.destruct(signer.address);
-    //   const receipt = await tx.wait(1);
-    //   console.log(
-    //     `Product ${oldProductAddress} has been destructed. (tx: ${receipt.transactionHash})`,
-    //   );
-    //   // deploy new Product
-    //   const productAddress = await this.deployProduct(
-    //     signer,
-    //     productData,
-    //     traceDataList,
-    //     quantity,
-    //   );
-    //   console.log(`======== End modify product ========`);
-    //   return productAddress;
-    // } catch (e) {
-    //   const msg = await this.printRevertReason(e);
-    //   throw new Error(msg);
-    // }
+    try {
+      console.log(`======== Begin modify product ========`);
+      // Set all dest to true in sourceList
+      const itemFactory = await this.getContractFactory(this.itemJSON);
+      const productFactory = await this.getContractFactory(this.productJSON);
+      const oldProduct = await itemFactory.connect(signer).attach(oldProductAddress);
+      const oldSourceList = await oldProduct.getSourceList();
+      for (let i = 0; i < oldSourceList.length; i++) {
+        console.log(traceDataList[i])
+        const { source, sourceName } = await this.connectSource(signer, traceDataList[i], itemFactory, productFactory);
+        const tx = await source.delDest(oldProductAddress);
+        const receipt = await tx.wait(1);
+        console.log(
+          `Source ${sourceName} (address: ${source.address}) is deleted and restore number. (tx: ${receipt.transactionHash})`,
+        );
+      }
+      // Set all source to true in destinationList
+      const oldDestinationList = await oldProduct.getDestinationList();
+      for (let i = 0; i < oldDestinationList.length; i++) {
+        let dest;
+        if (!oldDestinationList[i].shid.isZero()) {
+          dest = await itemFactory
+          .connect(signer)
+          .attach(oldDestinationList[i].usedObject);
+        } else {
+          dest = await productFactory
+          .connect(signer)
+          .attach(oldDestinationList[i].usedObject);
+        }
+        const tx = await dest.delSource(oldProductAddress);
+        const receipt = await tx.wait(1);
+        console.log(
+          `Product ${dest.address} delete source ${oldProductAddress}. (tx: ${receipt.transactionHash})`,
+        );
+      }
+      // destruct product
+      const tx = await oldProduct.destruct(signer.address);
+      const receipt = await tx.wait(1);
+      console.log(
+        `Product ${oldProductAddress} has been destructed. (tx: ${receipt.transactionHash})`,
+      );
+      // deploy new Product
+      const productAddress = await this.deployProduct(
+        signer,
+        productData,
+        traceDataList,
+        quantity,
+      );
+      console.log(`======== End modify product ========`);
+      return productAddress;
+    } catch (e) {
+      const msg = await this.printRevertReason(e);
+      throw new Error(msg);
+    }
   }
 }
