@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export type ProcedureDocument = Procedure & Document;
 

@@ -8,8 +8,14 @@ export class Quantity {
 
   constructor(object) {
     this.producedNumber = BigNumber.from(object.producedNumber);
-    this.restNumber = object.restNumber !== undefined ? BigNumber.from(object.restNumber) : BigNumber.from(object.producedNumber);
-    this.packNumber = object.packNumber !== undefined ? BigNumber.from(object.packNumber) : BigNumber.from(0);
+    this.restNumber =
+      object.restNumber !== undefined
+        ? BigNumber.from(object.restNumber)
+        : BigNumber.from(object.producedNumber);
+    this.packNumber =
+      object.packNumber !== undefined
+        ? BigNumber.from(object.packNumber)
+        : BigNumber.from(0);
     this.unit = object.unit;
   }
 

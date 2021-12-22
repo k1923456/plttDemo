@@ -3,16 +3,19 @@ import { Job } from 'bull';
 import { EthersService } from '../ethers/ethers.service';
 import { ItemDto, Source } from './dto/item.dto';
 import { ItemService } from './item.service';
+import { ProcedureService } from '../procedure/procedure.service';
 import { ProductService } from '../product/product.service';
 import { ItemData } from '../ethers/schemas/item.schema';
 import { TraceData } from '../ethers/schemas/traceData.schema';
 import { Quantity } from '../ethers/schemas/quantity.schema';
+import { ProcedureDto } from '../procedure/dto/procedure.dto';
 
 @Processor('item')
 export class ItemConsumer {
   constructor(
     private readonly ethersService: EthersService,
     private readonly itemService: ItemService,
+    private readonly procedureService: ProcedureService,
     private readonly productService: ProductService,
   ) {}
 
@@ -56,7 +59,7 @@ export class ItemConsumer {
         usedObject: sourceData.address,
         usedNumber: source.usedNumber,
         isDeleted: false,
-        name: sourceData.title
+        name: sourceData.title,
       };
     }
     return null;
@@ -70,7 +73,7 @@ export class ItemConsumer {
         usedObject: sourceData.address,
         usedNumber: source.usedNumber,
         isDeleted: false,
-        name: sourceData.title
+        name: sourceData.title,
       };
     }
     return null;
@@ -84,18 +87,40 @@ export class ItemConsumer {
         if (source !== null) {
           sourceList.push(await this.getItem(itemDto.sourceList[i]));
         } else {
-          throw new Error(`Source ${itemDto.sourceList[i].shid} is not created`)
+          throw new Error(
+            `Source ${itemDto.sourceList[i].shid} is not created`,
+          );
         }
       } else {
         const source = await this.getProduct(itemDto.sourceList[i]);
         if (source !== null) {
           sourceList.push(await this.getProduct(itemDto.sourceList[i]));
         } else {
-          throw new Error(`Source ${itemDto.sourceList[i].phid} is not created`)
+          throw new Error(
+            `Source ${itemDto.sourceList[i].phid} is not created`,
+          );
         }
       }
     }
     return sourceList;
+  }
+
+  async getProcedureWallet(procedureDto: ProcedureDto) {
+    const procedureData = await this.procedureService.findOneProcedure(
+      procedureDto.procedureID,
+    );
+    if (procedureData === null) {
+      const wallet = await this.ethersService.generateAccount(
+        procedureDto.procedureID.toString(),
+      );
+      await this.procedureService.createProcedure(
+        procedureDto,
+        wallet._signingKey().privateKey,
+      );
+      return wallet;
+    } else {
+      return this.ethersService.getSigner(procedureData.privateKey);
+    }
   }
 
   @Process('deployItem')
@@ -129,13 +154,18 @@ export class ItemConsumer {
       job.data.itemDto,
       sourceList,
     );
-    const itemAddress = await this.ethersService.modifyItem(
+    const { itemAddress, procedureList } = await this.ethersService.modifyItem(
       wallet,
       item.address,
       itemData,
       traceDataList,
       quantity,
     );
+    // Add procedure back
+    await procedureList.forEach(async (element) => {
+      const wallet = await this.getProcedureWallet(element);
+      await this.ethersService.addProcedure(wallet, itemAddress, element);
+    });
     await this.itemService.createItem(job.data.itemDto, itemAddress);
   }
 }

@@ -27,7 +27,11 @@ export class ProductService {
         {
           phid: productDto.phid,
         },
-        new ProductEntity({ shid: productDto.phid, title: productDto.title, address: productAddress }),
+        new ProductEntity({
+          shid: productDto.phid,
+          title: productDto.title,
+          address: productAddress,
+        }),
         { upsert: true },
       )
       .exec();

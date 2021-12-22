@@ -57,9 +57,14 @@ export class ProductController {
         HttpStatus.NOT_FOUND,
       );
     }
-    const product = await this.productService.findOneProduct(job.data.productDto.phid);
+    const product = await this.productService.findOneProduct(
+      job.data.productDto.phid,
+    );
     if (product === null) {
-      throw new HttpException(`Product has not been created`, HttpStatus.CONFLICT);
+      throw new HttpException(
+        `Product has not been created`,
+        HttpStatus.CONFLICT,
+      );
     }
     const status = await job.getState();
     let failedReason = '';
@@ -95,7 +100,10 @@ export class ProductController {
   async update(@Body() productDto: ProductDto) {
     const product = await this.productService.findOneProduct(productDto.phid);
     if (product === null) {
-      throw new HttpException(`Product has not been created`, HttpStatus.CONFLICT);
+      throw new HttpException(
+        `Product has not been created`,
+        HttpStatus.CONFLICT,
+      );
     }
     this.checkSourceList(productDto);
     const job = await this.AddProductJob('modifyProduct', productDto);

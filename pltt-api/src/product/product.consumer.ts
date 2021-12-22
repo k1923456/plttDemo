@@ -33,7 +33,9 @@ export class ProductConsumer {
       );
       organizationWallet = wallet;
     } else {
-      organizationWallet = this.ethersService.getSigner(organizationData.privateKey);
+      organizationWallet = this.ethersService.getSigner(
+        organizationData.privateKey,
+      );
     }
 
     // Owner
@@ -53,10 +55,14 @@ export class ProductConsumer {
       ownerWallet = this.ethersService.getSigner(ownerData.privateKey);
     }
 
-    return {organizationWallet, ownerWallet}
+    return { organizationWallet, ownerWallet };
   }
 
-  generateProductData(productDto: ProductDto, organization: string, owner: string) {
+  generateProductData(
+    productDto: ProductDto,
+    organization: string,
+    owner: string,
+  ) {
     return new ProductData({ ...productDto, organization, owner });
   }
 
@@ -78,7 +84,7 @@ export class ProductConsumer {
         usedObject: sourceData.address,
         usedNumber: source.usedNumber,
         isDeleted: false,
-        name: sourceData.title
+        name: sourceData.title,
       };
     }
     return null;
@@ -92,7 +98,7 @@ export class ProductConsumer {
         usedObject: sourceData.address,
         usedNumber: source.usedNumber,
         isDeleted: false,
-        name: sourceData.title
+        name: sourceData.title,
       };
     }
     return null;
@@ -106,14 +112,18 @@ export class ProductConsumer {
         if (source !== null) {
           sourceList.push(await this.getItem(productDto.sourceList[i]));
         } else {
-          throw new Error(`Source ${productDto.sourceList[i].shid} is not created`)
+          throw new Error(
+            `Source ${productDto.sourceList[i].shid} is not created`,
+          );
         }
       } else {
         const source = await this.getProduct(productDto.sourceList[i]);
         if (source !== null) {
           sourceList.push(await this.getProduct(productDto.sourceList[i]));
         } else {
-          throw new Error(`Source ${productDto.sourceList[i].phid} is not created`)
+          throw new Error(
+            `Source ${productDto.sourceList[i].phid} is not created`,
+          );
         }
       }
     }
@@ -123,8 +133,14 @@ export class ProductConsumer {
   @Process('deployProduct')
   async deployProduct(job: Job) {
     // Check Organization Existed
-    const {organizationWallet, ownerWallet} = await this.getWallet(job.data.productDto);
-    const productData = this.generateProductData(job.data.productDto, organizationWallet.address, ownerWallet.address);
+    const { organizationWallet, ownerWallet } = await this.getWallet(
+      job.data.productDto,
+    );
+    const productData = this.generateProductData(
+      job.data.productDto,
+      organizationWallet.address,
+      ownerWallet.address,
+    );
     const sourceList = await this.generateSourceList(job.data.productDto);
     const { quantity, traceDataList } = this.generateTraceableObjectData(
       job.data.productDto,
@@ -136,15 +152,26 @@ export class ProductConsumer {
       traceDataList,
       quantity,
     );
-    await this.productService.createProduct(job.data.productDto, productAddress);
+    await this.productService.createProduct(
+      job.data.productDto,
+      productAddress,
+    );
   }
 
   @Process('modifyProduct')
   async modifyProduct(job: Job) {
     // Check Organization Existed
-    const product = await this.productService.findOneProduct(job.data.productDto.phid);
-    const {organizationWallet, ownerWallet} = await this.getWallet(job.data.productDto);
-    const productData = this.generateProductData(job.data.productDto, organizationWallet.address, ownerWallet.address);
+    const product = await this.productService.findOneProduct(
+      job.data.productDto.phid,
+    );
+    const { organizationWallet, ownerWallet } = await this.getWallet(
+      job.data.productDto,
+    );
+    const productData = this.generateProductData(
+      job.data.productDto,
+      organizationWallet.address,
+      ownerWallet.address,
+    );
     const sourceList = await this.generateSourceList(job.data.productDto);
     const { quantity, traceDataList } = this.generateTraceableObjectData(
       job.data.productDto,
@@ -157,6 +184,9 @@ export class ProductConsumer {
       traceDataList,
       quantity,
     );
-    await this.productService.createProduct(job.data.productDto, productAddress);
+    await this.productService.createProduct(
+      job.data.productDto,
+      productAddress,
+    );
   }
 }

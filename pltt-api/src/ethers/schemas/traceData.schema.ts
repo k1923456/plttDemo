@@ -9,8 +9,14 @@ export class TraceData {
   isDeleted: boolean;
 
   constructor(object) {
-    this.shid = object.shid !== undefined ? BigNumber.from(object.shid) : BigNumber.from(0);
-    this.phid = object.phid !== undefined ? BigNumber.from(object.phid) : BigNumber.from(0);
+    this.shid =
+      object.shid !== undefined
+        ? BigNumber.from(object.shid)
+        : BigNumber.from(0);
+    this.phid =
+      object.phid !== undefined
+        ? BigNumber.from(object.phid)
+        : BigNumber.from(0);
     this.name = object.name;
     this.usedObject = object.usedObject;
     this.usedNumber = BigNumber.from(object.usedNumber).toString();

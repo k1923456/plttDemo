@@ -72,23 +72,26 @@ export class EthersService {
     );
   }
 
-  async connectSource(signer, traceData: TraceData, itemFactory, productFactory) {
+  async connectSource(
+    signer,
+    traceData: TraceData,
+    itemFactory,
+    productFactory,
+  ) {
     let source;
-        let sourceName;
-        if (!traceData.shid.isZero()) {
-          source = await itemFactory
-          .connect(signer)
-          .attach(traceData.usedObject);
-          console.log((await source.itemData()))
-          console.log(signer.address)
-          sourceName = (await source.itemData()).name;
-        } else {
-          source = await productFactory
-          .connect(signer)
-          .attach(traceData.usedObject);
-          sourceName = (await source.productData()).name;
-        }
-        return { source, sourceName }
+    let sourceName;
+    if (!traceData.shid.isZero()) {
+      source = await itemFactory.connect(signer).attach(traceData.usedObject);
+      console.log(await source.itemData());
+      console.log(signer.address);
+      sourceName = (await source.itemData()).name;
+    } else {
+      source = await productFactory
+        .connect(signer)
+        .attach(traceData.usedObject);
+      sourceName = (await source.productData()).name;
+    }
+    return { source, sourceName };
   }
 
   async deployItem(
@@ -109,7 +112,12 @@ export class EthersService {
 
       // Add destination of source
       for (let i = 0; i < traceDataList.length; i++) {
-        const { source, sourceName } = await this.connectSource(signer, traceDataList[i], itemFactory, productFactory);
+        const { source, sourceName } = await this.connectSource(
+          signer,
+          traceDataList[i],
+          itemFactory,
+          productFactory,
+        );
         const tx = await source.addDests(
           [
             {
@@ -164,7 +172,12 @@ export class EthersService {
       const oldItem = await itemFactory.connect(signer).attach(oldItemAddress);
       const oldSourceList = await oldItem.getSourceList();
       for (let i = 0; i < oldSourceList.length; i++) {
-        const { source, sourceName } = await this.connectSource(signer, traceDataList[i], itemFactory, productFactory);
+        const { source, sourceName } = await this.connectSource(
+          signer,
+          traceDataList[i],
+          itemFactory,
+          productFactory,
+        );
         const tx = await source.delDest(oldItemAddress);
         const receipt = await tx.wait(1);
         console.log(
@@ -177,12 +190,12 @@ export class EthersService {
         let dest;
         if (!oldDestinationList[i].shid.isZero()) {
           dest = await itemFactory
-          .connect(signer)
-          .attach(oldDestinationList[i].usedObject);
+            .connect(signer)
+            .attach(oldDestinationList[i].usedObject);
         } else {
           dest = await productFactory
-          .connect(signer)
-          .attach(oldDestinationList[i].usedObject);
+            .connect(signer)
+            .attach(oldDestinationList[i].usedObject);
         }
         const tx = await dest.delSource(oldItemAddress);
         const receipt = await tx.wait(1);
@@ -190,6 +203,10 @@ export class EthersService {
           `Item ${dest.address} delete source ${oldItemAddress}. (tx: ${receipt.transactionHash})`,
         );
       }
+
+      // Get ProcedureList of oldItem
+      const procedureList = await oldItem.getProcedureList();
+
       // destruct item
       const tx = await oldItem.destruct(signer.address);
       const receipt = await tx.wait(1);
@@ -203,8 +220,9 @@ export class EthersService {
         traceDataList,
         quantity,
       );
+
       console.log(`======== End modify item ========`);
-      return itemAddress;
+      return { itemAddress, procedureList };
     } catch (e) {
       const msg = await this.printRevertReason(e);
       throw new Error(msg);
@@ -220,6 +238,7 @@ export class EthersService {
     const itemFactory = await this.getContractFactory(this.itemJSON);
     const item = await itemFactory.connect(signer).attach(itemAddress);
 
+    console.log(procedureData);
     const tx = await item.addProcedure(procedureData);
     const receipt = await tx.wait(1);
 
@@ -239,7 +258,9 @@ export class EthersService {
       console.log(`======== Begin deploy product ========`);
       const itemFactory = await this.getContractFactory(this.itemJSON);
       const productFactory = await this.getContractFactory(this.productJSON);
-      const product = await productFactory.connect(signer).deploy(productData, quantity);
+      const product = await productFactory
+        .connect(signer)
+        .deploy(productData, quantity);
       const productName = (await product.productData()).name;
       console.log(
         `Deployed product contract ${productName} ( ${product.address} ), Organization is ${signer.address}`,
@@ -247,8 +268,13 @@ export class EthersService {
 
       // Add destination of source
       for (let i = 0; i < traceDataList.length; i++) {
-        console.log(traceDataList[i])
-        const { source, sourceName } = await this.connectSource(signer, traceDataList[i], itemFactory, productFactory);
+        console.log(traceDataList[i]);
+        const { source, sourceName } = await this.connectSource(
+          signer,
+          traceDataList[i],
+          itemFactory,
+          productFactory,
+        );
         const tx = await source.addDests(
           [
             {
@@ -269,7 +295,9 @@ export class EthersService {
       }
       if (traceDataList.length !== 0) {
         // Add sources of newly created product
-        const tx = await product.addSources(traceDataList, { gasLimit: 400000 });
+        const tx = await product.addSources(traceDataList, {
+          gasLimit: 400000,
+        });
         const receipt = await tx.wait(1);
         const traceIDs = traceDataList.map((ele) => {
           return ele.shid.isZero ? ele.phid : ele.shid;
@@ -300,11 +328,18 @@ export class EthersService {
       // Set all dest to true in sourceList
       const itemFactory = await this.getContractFactory(this.itemJSON);
       const productFactory = await this.getContractFactory(this.productJSON);
-      const oldProduct = await itemFactory.connect(signer).attach(oldProductAddress);
+      const oldProduct = await itemFactory
+        .connect(signer)
+        .attach(oldProductAddress);
       const oldSourceList = await oldProduct.getSourceList();
       for (let i = 0; i < oldSourceList.length; i++) {
-        console.log(traceDataList[i])
-        const { source, sourceName } = await this.connectSource(signer, traceDataList[i], itemFactory, productFactory);
+        console.log(traceDataList[i]);
+        const { source, sourceName } = await this.connectSource(
+          signer,
+          traceDataList[i],
+          itemFactory,
+          productFactory,
+        );
         const tx = await source.delDest(oldProductAddress);
         const receipt = await tx.wait(1);
         console.log(
@@ -317,12 +352,12 @@ export class EthersService {
         let dest;
         if (!oldDestinationList[i].shid.isZero()) {
           dest = await itemFactory
-          .connect(signer)
-          .attach(oldDestinationList[i].usedObject);
+            .connect(signer)
+            .attach(oldDestinationList[i].usedObject);
         } else {
           dest = await productFactory
-          .connect(signer)
-          .attach(oldDestinationList[i].usedObject);
+            .connect(signer)
+            .attach(oldDestinationList[i].usedObject);
         }
         const tx = await dest.delSource(oldProductAddress);
         const receipt = await tx.wait(1);

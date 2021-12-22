@@ -6,8 +6,10 @@ import {
   OrganizationSchema,
 } from '../schemas/organization.schema';
 import { Item, ItemSchema } from '../schemas/item.schema';
+import { Procedure, ProcedureSchema } from '../schemas/procedure.schema';
 import { Product, ProductSchema } from '../schemas/product.schema';
 import { ItemService } from './item.service';
+import { ProcedureService } from '../procedure/procedure.service';
 import { ProductService } from '../product/product.service';
 import { ItemController } from './item.controller';
 import { ItemConsumer } from './item.consumer';
@@ -17,6 +19,7 @@ import { ItemConsumer } from './item.consumer';
     MongooseModule.forFeature([
       { name: Organization.name, schema: OrganizationSchema },
       { name: Item.name, schema: ItemSchema },
+      { name: Procedure.name, schema: ProcedureSchema },
       { name: Product.name, schema: ProductSchema },
     ]),
     BullModule.registerQueue({
@@ -24,6 +27,6 @@ import { ItemConsumer } from './item.consumer';
     }),
   ],
   controllers: [ItemController],
-  providers: [ItemService, ProductService, ItemConsumer],
+  providers: [ItemService, ProcedureService, ProductService, ItemConsumer],
 })
 export class ItemModule {}

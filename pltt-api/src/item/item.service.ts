@@ -23,7 +23,11 @@ export class ItemService {
         {
           shid: itemDto.shid,
         },
-        new ItemEntity({ shid: itemDto.shid, title: itemDto.title, address: itemAddress }),
+        new ItemEntity({
+          shid: itemDto.shid,
+          title: itemDto.title,
+          address: itemAddress,
+        }),
         { upsert: true },
       )
       .exec();
