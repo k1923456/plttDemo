@@ -19,6 +19,7 @@ import { ProductModule } from './product/product.module';
       redis: {
         host: 'localhost',
         port: 6379,
+        password: process.env.REDIS_PWD
       },
     }),
     EthersModule,
