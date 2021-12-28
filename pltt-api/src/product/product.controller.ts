@@ -57,6 +57,19 @@ export class ProductController {
         HttpStatus.NOT_FOUND,
       );
     }
+    const status = await job.getState();
+    let failedReason = '';
+    if (status === 'failed') {
+      failedReason = job.failedReason;
+
+      return {
+        jobID: params.jobID,
+        status,
+        address: "",
+        failedReason,
+      };
+    }
+
     const product = await this.productService.findOneProduct(
       job.data.productDto.phid,
     );
@@ -65,11 +78,6 @@ export class ProductController {
         `Product has not been created`,
         HttpStatus.CONFLICT,
       );
-    }
-    const status = await job.getState();
-    let failedReason = '';
-    if (status === 'failed') {
-      failedReason = job.failedReason;
     }
 
     return {

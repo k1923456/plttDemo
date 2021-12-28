@@ -57,14 +57,21 @@ export class ItemController {
         HttpStatus.NOT_FOUND,
       );
     }
-    const item = await this.itemService.findOneItem(job.data.itemDto.shid);
-    if (item === null) {
-      throw new HttpException(`Item has not been created`, HttpStatus.CONFLICT);
-    }
     const status = await job.getState();
     let failedReason = '';
     if (status === 'failed') {
       failedReason = job.failedReason;
+      return {
+        jobID: params.jobID,
+        status,
+        address: "",
+        failedReason,
+      };
+    }
+
+    const item = await this.itemService.findOneItem(job.data.itemDto.shid);
+    if (item === null) {
+      throw new HttpException(`Item has not been created`, HttpStatus.CONFLICT);
     }
 
     return {
