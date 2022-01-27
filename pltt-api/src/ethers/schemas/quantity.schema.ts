@@ -1,4 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
+const divisor = parseInt(process.env.DIVISOR, 10);
 
 export class Quantity {
   producedNumber: BigNumber;
@@ -7,14 +8,14 @@ export class Quantity {
   unit: string;
 
   constructor(object) {
-    this.producedNumber = BigNumber.from(object.producedNumber);
+    this.producedNumber = BigNumber.from(Math.floor(object.producedNumber * divisor));
     this.restNumber =
       object.restNumber !== undefined
-        ? BigNumber.from(object.restNumber)
-        : BigNumber.from(object.producedNumber);
+        ? BigNumber.from(Math.floor(object.restNumber * divisor))
+        : BigNumber.from(Math.floor(object.producedNumber * divisor));
     this.packNumber =
       object.packNumber !== undefined
-        ? BigNumber.from(object.packNumber)
+        ? BigNumber.from(Math.floor(object.packNumber * divisor))
         : BigNumber.from(0);
     this.unit = object.unit;
   }

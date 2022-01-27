@@ -13,9 +13,9 @@ export class ItemData {
     this.shid = BigNumber.from(object.shid);
     this.organizationID = BigNumber.from(object.organizationID);
     this.producedDate = BigNumber.from(Date.parse(object.producedDate) / 1000);
-    this.expirationDate = BigNumber.from(
+    this.expirationDate = object.expirationDate !== undefined ? BigNumber.from(
       Date.parse(object.expirationDate) / 1000,
-    );
+    ) : BigNumber.from(0);
     this.organization = object.organization;
     this.name = object.title;
     this.organizationName = object.organizationName;
