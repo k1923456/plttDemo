@@ -1,0 +1,35 @@
+version: "3.8"
+networks:
+  pltt-api-network:
+    driver: bridge
+services:
+  pltt-mongodb:
+    image: mongo:4.2-bionic
+    container_name: pltt-mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_DATABASE=admin
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=adminpw
+    volumes:
+      # seeding scripts
+      - ./compose/mongo/mongo-entrypoint:/docker-entrypoint-initdb.d
+      # named volumes
+      - ./compose/mongo/mongodb:/data/db
+      - ./compose/mongo/mongoconfig:/data/configdb
+    networks:
+      - pltt-api-network
+
+  pltt-redis:
+    image: redis:4.0.5-alpine
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "1234"]
+    container_name: pltt-redis
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - pltt-api-network
+    volumes:
+      - ./compose/redis/data:/data

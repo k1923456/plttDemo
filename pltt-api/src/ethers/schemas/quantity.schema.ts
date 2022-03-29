@@ -8,6 +8,7 @@ export class Quantity {
   unit: string;
 
   constructor(object) {
+    console.log(object)
     this.producedNumber = BigNumber.from(Math.floor(object.producedNumber * divisor));
     this.restNumber =
       object.restNumber !== undefined

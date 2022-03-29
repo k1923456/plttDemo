@@ -90,6 +90,7 @@ export class ItemController {
     }
 
     this.checkSourceList(itemDto);
+    console.log(itemDto)
     const job = await this.AddItemJob('deployItem', itemDto);
 
     return {

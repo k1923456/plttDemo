@@ -42,11 +42,15 @@ export class ItemConsumer {
   }
 
   generateTraceableObjectData(dto: ItemDto, sourceList) {
+    console.log("BBB")
     const quantity = new Quantity(dto);
+    console.log("BBB")
     const traceDataList: TraceData[] = [];
+    console.log("BBB")
     for (let i = 0; i < sourceList.length; i++) {
       traceDataList.push(new TraceData(sourceList[i]));
     }
+    console.log("BBB")
 
     return { quantity, traceDataList };
   }
@@ -128,11 +132,14 @@ export class ItemConsumer {
     // Check Organization Existed
     const wallet = await this.getWallet(job.data.itemDto);
     const itemData = this.generateItemData(job.data.itemDto, wallet.address);
+    console.log("AAA")
     const sourceList = await this.generateSourceList(job.data.itemDto);
+    console.log("AAA")
     const { quantity, traceDataList } = this.generateTraceableObjectData(
       job.data.itemDto,
       sourceList,
     );
+    console.log("AAA")
 
     const itemAddress = await this.ethersService.deployItem(
       wallet,
@@ -140,7 +147,9 @@ export class ItemConsumer {
       traceDataList,
       quantity,
     );
+    console.log("AAA")
     await this.itemService.createItem(job.data.itemDto, itemAddress);
+    console.log("AAA")
   }
 
   @Process('modifyItem')
