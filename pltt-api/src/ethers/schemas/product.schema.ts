@@ -34,7 +34,11 @@ export class ProductData {
     }
     this.name = object.title;
     this.organizationName = object.organizationName;
-    this.ownerName = object.ownerName;
+    if (!object.ownerName) {
+      this.ownerName = '';
+    } else {
+      this.ownerName = object.ownerName;
+    }
   }
 
   getObeject() {
