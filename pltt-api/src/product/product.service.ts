@@ -74,6 +74,13 @@ export class ProductService {
   }
 
   async findOneOrganization(organizationID: number) {
+    if (!organizationID) {
+      return {
+        organizationID: '0x0000000000000000000000000000000000000000',
+        organizationName: '',
+        privateKey: '0x0000000000000000000000000000000000000000',
+      };
+    }
     return await this.organizationModel.findOne({ organizationID });
   }
 }

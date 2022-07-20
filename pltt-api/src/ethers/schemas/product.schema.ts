@@ -15,7 +15,11 @@ export class ProductData {
   constructor(object) {
     this.phid = BigNumber.from(object.phid);
     this.organizationID = BigNumber.from(object.organizationID);
-    this.ownerID = BigNumber.from(object.ownerID);
+    if (!object.ownerID) {
+      this.ownerID = BigNumber.from(0);
+    } else {
+      this.ownerID = BigNumber.from(object.ownerID);
+    }
     this.transactionDate = BigNumber.from(
       Date.parse(object.transactionDate) / 1000,
     );
@@ -23,7 +27,11 @@ export class ProductData {
       Date.parse(object.expirationDate) / 1000,
     );
     this.organization = object.organization;
-    this.owner = object.owner;
+    if (!object.owner) {
+      this.owner = '';
+    } else {
+      this.owner = object.owner;
+    }
     this.name = object.title;
     this.organizationName = object.organizationName;
     this.ownerName = object.ownerName;
