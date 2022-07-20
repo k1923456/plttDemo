@@ -51,6 +51,12 @@ export class ProductConsumer {
         wallet._signingKey().privateKey,
       );
       ownerWallet = wallet;
+    } else if (
+      ownerData.privateKey === '0x0000000000000000000000000000000000000000'
+    ) {
+      ownerWallet = {
+        address: '0x0000000000000000000000000000000000000000',
+      };
     } else {
       ownerWallet = this.ethersService.getSigner(ownerData.privateKey);
     }
