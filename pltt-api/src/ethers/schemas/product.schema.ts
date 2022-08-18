@@ -20,9 +20,13 @@ export class ProductData {
     } else {
       this.ownerID = BigNumber.from(object.ownerID);
     }
-    this.transactionDate = BigNumber.from(
-      Date.parse(object.transactionDate) / 1000,
-    );
+    if (!object.transactionDate) {
+      this.transactionDate = BigNumber.from(0);
+    } else {
+      this.transactionDate = BigNumber.from(
+        Date.parse(object.transactionDate) / 1000,
+      );
+    }
     this.expirationDate = BigNumber.from(
       Date.parse(object.expirationDate) / 1000,
     );
